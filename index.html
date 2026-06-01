@@ -1,1060 +1,1802 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard LATAM - Protocolo Hercules</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #03050f;
-            color: #fff;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        .container { max-width: 1600px; margin: 0 auto; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia TDAH Kids – Quiz Personalizado</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #F97316;
+  --orange-dark: #EA6C0A;
+  --orange-light: #FED7AA;
+  --cream: #FFFBF5;
+  --cream2: #FFF7ED;
+  --brown: #7C3D12;
+  --gray-dark: #1C1917;
+  --gray: #57534E;
+  --gray-light: #E7E5E4;
+  --green: #16A34A;
+  --red: #DC2626;
+  --yellow: #FACC15;
+  --white: #FFFFFF;
+}
 
-        /* ── PALETA AZUL ── */
-        :root {
-            --primary: #1a6bff;
-            --primary-dark: #0d3d99;
-            --primary-glow: rgba(26, 107, 255, 0.4);
-            --primary-dim: rgba(26, 107, 255, 0.15);
-            --primary-border: rgba(26, 107, 255, 0.5);
-            --green: #00e5a0;
-            --green-dim: rgba(0, 229, 160, 0.12);
-            --yellow: #ffc940;
-            --yellow-dim: rgba(255, 201, 64, 0.15);
-            --red: #ff4060;
-            --bg-card: #080c1a;
-            --bg-card2: #0b1020;
-            --border: rgba(26, 107, 255, 0.18);
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* scanline overlay */
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 4px);
-            pointer-events: none; z-index: 0;
-        }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--gray-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-        /* ── ALERTAS ── */
-        .alerts-container {
-            position: fixed;
-            top: 20px; right: 20px;
-            z-index: 9999;
-            max-width: 350px;
-        }
-        .alert-item {
-            background: linear-gradient(135deg, #080c1a 0%, #001133 100%);
-            border: 2px solid var(--green);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 0 30px rgba(0, 229, 160, 0.5);
-            animation: slideInRight 0.5s ease;
-            cursor: pointer;
-            position: relative;
-        }
-        .alert-item.checkout { border-color: var(--green); box-shadow: 0 0 30px rgba(0,229,160,0.5); }
-        .alert-item.sale { border-color: var(--yellow); box-shadow: 0 0 30px rgba(255,201,64,0.5); }
-        @keyframes slideInRight { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { to { opacity: 0; transform: translateX(400px); } }
-        .alert-title { font-size: 14px; font-weight: 900; color: var(--green); margin-bottom: 5px; text-transform: uppercase; font-family: 'Syne', sans-serif; }
-        .alert-item.sale .alert-title { color: var(--yellow); }
-        .alert-message { font-size: 13px; color: #ccc; line-height: 1.4; }
-        .alert-close { position: absolute; top: 10px; right: 10px; color: #999; cursor: pointer; font-size: 18px; line-height: 1; }
-        .alert-close:hover { color: #fff; }
+/* ===== SCREENS ===== */
+.screen {
+  display: none;
+  min-height: 100vh;
+  animation: fadeInUp 0.45s ease;
+}
+.screen.active { display: flex; flex-direction: column; }
 
-        /* ── HEADER ── */
-        .header {
-            background: linear-gradient(135deg, #080c1a 0%, #001033 100%);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 0 30px var(--primary-glow);
-        }
-        .title {
-            font-family: 'Syne', sans-serif;
-            font-size: 32px; font-weight: 900;
-            color: #4d9fff;
-            margin-bottom: 8px;
-            text-shadow: 0 0 20px rgba(77, 159, 255, 0.5);
-        }
-        .subtitle { color: #aaa; font-size: 14px; font-weight: 500; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-        /* ── ONLINE BADGE ── */
-        .online-badge {
-            background: var(--primary-dim);
-            border: 2px solid var(--primary);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 0 20px var(--primary-glow);
-        }
-        .online-label { color: #ccc; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .online-count {
-            font-family: 'Syne', sans-serif;
-            font-size: 56px; font-weight: 900;
-            color: #4d9fff;
-            text-shadow: 0 0 30px rgba(77, 159, 255, 0.6);
-            animation: pulseBlue 2s ease-in-out infinite;
-        }
-        @keyframes pulseBlue { 0%,100%{opacity:1;} 50%{opacity:0.75;} }
+/* ===== PROGRESS BAR ===== */
+.progress-bar-wrap {
+  background: var(--orange-light);
+  height: 6px;
+  width: 100%;
+  position: fixed;
+  top: 0; left: 0; z-index: 100;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
 
-        /* ── COMPARAÇÃO DE PERÍODOS ── */
-        .comparison-section {
-            background: linear-gradient(135deg, #080c1a 0%, #001033 100%);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 0 20px rgba(26,107,255,0.2);
-        }
-        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .comparison-card {
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .comparison-card.winner { border-color: var(--green); background: rgba(0,229,160,0.05); }
-        .comparison-card.loser  { border-color: var(--red); background: rgba(255,64,96,0.05); }
-        .comparison-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .comparison-period { font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; }
-        .comparison-badge { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
-        .comparison-badge.up { background: var(--green); color: #000; }
-        .comparison-badge.down { background: var(--red); color: #fff; }
-        .comparison-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .comparison-label { color: #999; font-size: 12px; font-weight: 600; }
-        .comparison-value { color: #fff; font-size: 14px; font-weight: 800; }
-        .comparison-diff { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; }
-        .comparison-diff.positive { color: var(--green); }
-        .comparison-diff.negative { color: var(--red); }
-        .comparison-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        .comparison-select {
-            flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #444;
-            color: #fff; padding: 10px 15px; border-radius: 8px;
-            font-size: 13px; font-weight: 600; cursor: pointer;
-        }
+/* ===== TOP BADGE ===== */
+.top-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--white);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange-dark);
+  box-shadow: 0 2px 10px rgba(249,115,22,.12);
+}
 
-        /* ── FILTROS COMPACTOS ── */
-        .compact-filters { display: flex; gap: 6px; align-items: center; }
-        .compact-filter-btn {
-            background: rgba(0,0,0,0.3); border: 1px solid #444; color: #999;
-            padding: 4px 12px; border-radius: 4px; cursor: pointer;
-            font-size: 11px; font-weight: 600; transition: all 0.2s;
-        }
-        .compact-filter-btn:hover { background: var(--primary-dim); border-color: var(--primary); color: #4d9fff; }
-        .compact-filter-btn.active { background: var(--primary-dim); border-color: var(--primary); color: #4d9fff; }
-        .compact-date-input {
-            background: rgba(0,0,0,0.3); border: 1px solid #444; color: #999;
-            padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
-            cursor: pointer; width: 110px;
-        }
-        .compact-date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+/* ===== SCREEN 1 – INTRO ===== */
+#s1 {
+  background: var(--cream);
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 24px 40px;
+  text-align: center;
+}
+.s1-inner { max-width: 400px; width: 100%; }
+.s1-icon { font-size: 52px; margin-bottom: 6px; }
+.s1-product-img {
+  width: 220px;
+  height: 160px;
+  background: linear-gradient(135deg, #FED7AA 0%, #FDBA74 50%, #F97316 100%);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 12px 40px rgba(249,115,22,.3);
+  position: relative;
+  overflow: hidden;
+}
+.s1-product-img::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,.2);
+  border-radius: 50%;
+}
+.s1-product-img-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--white);
+  text-align: center;
+  line-height: 1.2;
+  padding: 10px;
+  position: relative;
+  z-index: 1;
+}
+.new-badge {
+  background: var(--orange);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 4px;
+  padding: 2px 8px;
+  position: absolute;
+  top: 12px; right: 12px;
+}
+.personalized-pill {
+  background: var(--white);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 50px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange-dark);
+  display: inline-block;
+  margin-bottom: 22px;
+}
+.s1-h1 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.0;
+  color: var(--gray-dark);
+  margin-bottom: 6px;
+}
+.s1-h1 span { color: var(--orange); }
+.s1-sub {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.s1-desc {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+.s1-desc strong { color: var(--orange-dark); }
 
-        /* ── SEÇÕES GERAIS ── */
-        .stats-section {
-            background: linear-gradient(135deg, #080c1a 0%, #001033 100%);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 0 20px rgba(26,107,255,0.2);
-        }
-        .section-title {
-            font-family: 'Syne', sans-serif;
-            color: #4d9fff;
-            font-size: 14px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            margin-bottom: 20px;
-            display: flex; align-items: center; gap: 8px;
-            text-shadow: 0 0 10px rgba(77,159,255,0.3);
-        }
+/* ===== QUIZ WRAPPER ===== */
+.quiz-wrap {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 70px 20px 40px;
+  flex: 1;
+}
 
-        /* ── STAT CARDS ── */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-        .stat-card {
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #1e2a44;
-            border-radius: 8px; padding: 20px; text-align: center;
-            transition: all 0.3s;
-        }
-        .stat-card:hover { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-        .stat-card.highlight {
-            background: linear-gradient(135deg, rgba(0,229,160,0.1) 0%, rgba(0,200,140,0.05) 100%);
-            border: 2px solid var(--green);
-            animation: pulseGreen 2s ease-in-out infinite;
-        }
-        .stat-card.highlight:hover { box-shadow: 0 0 25px rgba(0,229,160,0.5); }
-        .stat-card.highlight .stat-value { color: var(--green); text-shadow: 0 0 20px rgba(0,229,160,0.5); }
-        @keyframes pulseGreen { 0%,100%{box-shadow:0 0 15px rgba(0,229,160,0.3);} 50%{box-shadow:0 0 30px rgba(0,229,160,0.6);} }
-        .stat-label { color: #999; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .stat-value { color: #fff; font-size: 36px; font-weight: 900; margin-bottom: 5px; font-family: 'Syne', sans-serif; }
-        .stat-percent { color: #4d9fff; font-size: 13px; font-weight: 600; }
+/* ===== QUESTION SCREENS ===== */
+.q-step-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+.q-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--gray-dark);
+  margin-bottom: 6px;
+}
+.q-sub {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
 
-        /* ── MAIN GRID ── */
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+/* ===== OPTIONS ===== */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border: 2px solid var(--gray-light);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.option-btn:hover {
+  border-color: var(--orange);
+  background: var(--cream2);
+  transform: translateX(3px);
+}
+.option-btn.selected {
+  border-color: var(--orange);
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  color: var(--orange-dark);
+  box-shadow: 0 4px 16px rgba(249,115,22,.2);
+}
+.option-btn .opt-emoji { font-size: 26px; flex-shrink: 0; }
+.option-btn .opt-check {
+  width: 22px; height: 22px;
+  border: 2px solid var(--gray-light);
+  border-radius: 50%;
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+.option-btn.selected .opt-check {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+}
 
-        /* ── FUNIL ── */
-        .funnel-stage {
-            background: linear-gradient(135deg, var(--primary-dim) 0%, rgba(26,107,255,0.05) 100%);
-            border: 2px solid var(--primary);
-            border-radius: 8px; padding: 15px; margin-bottom: 10px;
-            position: relative; transition: all 0.3s;
-        }
-        .funnel-stage:hover { background: rgba(26,107,255,0.25); box-shadow: 0 0 15px var(--primary-glow); }
-        .funnel-stage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .funnel-stage-name { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; }
-        .funnel-stage-count { font-size: 18px; font-weight: 900; color: #4d9fff; font-family: 'Syne', sans-serif; }
-        .funnel-stage-bar { width: 100%; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-        .funnel-stage-fill { height: 100%; background: linear-gradient(90deg, var(--primary-dark) 0%, #4d9fff 100%); transition: width 0.5s ease; }
-        .funnel-stage-percent { font-size: 11px; color: #999; font-weight: 600; }
-        .funnel-arrow { text-align: center; font-size: 18px; color: var(--primary); margin: -5px 0; }
+/* Gender options bigger */
+.gender-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.gender-btn {
+  background: var(--white);
+  border: 2px solid var(--gray-light);
+  border-radius: 18px;
+  padding: 24px 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gray-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.gender-btn:hover { border-color: var(--orange); transform: translateY(-3px); }
+.gender-btn.selected {
+  border-color: var(--orange);
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  color: var(--orange-dark);
+  box-shadow: 0 8px 24px rgba(249,115,22,.25);
+}
+.gender-img-placeholder {
+  width: 100%;
+  height: 110px;
+  background: linear-gradient(135deg, var(--orange-light), #FDBA74);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+}
 
-        /* ── HEATMAP ── */
-        .heatmap-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .heatmap-table th, .heatmap-table td { padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600; border: 1px solid rgba(26,107,255,0.2); }
-        .heatmap-table th { background: var(--primary-dim); color: #4d9fff; font-weight: 800; text-transform: uppercase; font-size: 11px; }
-        .heatmap-table .day-label { background: var(--primary-dim); color: #fff; font-weight: 700; text-align: left; padding-left: 15px; }
-        .heatmap-cell { position: relative; cursor: pointer; transition: all 0.3s; }
-        .heatmap-cell:hover { transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.3); }
-        .heatmap-cell.high   { background: rgba(0,229,160,0.6); color: #000; font-weight: 900; }
-        .heatmap-cell.medium { background: rgba(255,201,64,0.6); color: #000; font-weight: 900; }
-        .heatmap-cell.low    { background: rgba(255,64,96,0.6); color: #fff; font-weight: 900; }
-        .heatmap-cell.empty  { background: rgba(0,0,0,0.3); color: #666; }
-        .heatmap-legend { display: flex; gap: 20px; justify-content: center; margin-top: 15px; padding: 10px; font-size: 11px; }
-        .heatmap-legend-item { display: flex; align-items: center; gap: 8px; }
-        .heatmap-legend-color { width: 20px; height: 20px; border-radius: 4px; }
+/* ===== PRIMARY BUTTON ===== */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 17px 24px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(249,115,22,.45);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(249,115,22,.5);
+}
+.btn-primary:active { transform: translateY(0); }
 
-        /* ── CHART CONTAINERS ── */
-        .chart-and-retention { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-container { background: linear-gradient(135deg, #080c1a 0%, #001033 100%); border: 2px solid var(--primary); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(26,107,255,0.2); }
-        .chart-wrapper { position: relative; height: 300px; margin-top: 20px; }
+.btn-continue {
+  width: 100%;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 17px 24px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(249,115,22,.4);
+  transition: all 0.2s;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.btn-continue:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(249,115,22,.5); }
+.btn-continue.show { display: flex; }
 
-        /* ── QUIZ RETENTION ── */
-        .quiz-retention { background: linear-gradient(135deg, #080c1a 0%, #001033 100%); border: 2px solid var(--primary); border-radius: 12px; padding: 25px; box-shadow: 0 0 20px rgba(26,107,255,0.2); }
-        .quiz-stats { display: grid; gap: 8px; max-height: 340px; overflow-y: auto; }
-        .quiz-row { background: rgba(0,0,0,0.5); border-left: 4px solid var(--primary); padding: 10px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; font-size: 12px; }
-        .quiz-row:hover { background: var(--primary-dim); box-shadow: 0 0 15px var(--primary-glow); }
-        .quiz-step { color: #fff; font-weight: 600; }
-        .quiz-count { color: #4d9fff; font-size: 14px; font-weight: 800; font-family: 'Syne', sans-serif; }
+/* ===== NAME INPUT ===== */
+.name-input-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+.name-input {
+  width: 100%;
+  border: 2px solid var(--gray-light);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-dark);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.name-input:focus { border-color: var(--orange); }
+.name-input::placeholder { color: #A8A29E; font-weight: 600; }
 
-        /* ── SPY ── */
-        .spy-section-title { font-family: 'Syne', sans-serif; color: #4d9fff; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(77,159,255,0.3); }
-        .spy-container { background: linear-gradient(135deg, #080c1a 0%, #001033 100%); border: 2px solid var(--primary); border-radius: 12px; padding: 20px; max-height: 600px; overflow-y: auto; box-shadow: 0 0 20px rgba(26,107,255,0.2); }
-        .spy-filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .spy-filter-btn { background: rgba(0,0,0,0.5); border: 1px solid #444; color: #999; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; transition: all 0.2s; }
-        .spy-filter-btn:hover { border-color: var(--primary); color: #4d9fff; }
-        .spy-filter-btn.active { background: var(--primary-dim); border-color: var(--primary); color: #4d9fff; }
+/* ===== SOCIAL PROOF BADGE ===== */
+.social-badge {
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border: 1.5px solid var(--orange-light);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.social-badge-count {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--orange-dark);
+  line-height: 1;
+}
+.social-badge-text { font-size: 13px; font-weight: 700; color: var(--gray); line-height: 1.3; }
+.social-avatars { display: flex; }
+.social-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.social-avatar:first-child { margin-left: 0; }
 
-        .spy-item {
-            background: rgba(0,0,0,0.5);
-            border-left: 4px solid #4d9fff;
-            padding: 18px 20px; border-radius: 10px; margin-bottom: 12px;
-            animation: slideInLeft 0.4s ease; transition: all 0.3s;
-            display: grid; grid-template-columns: auto 1fr auto;
-            gap: 15px; align-items: center;
-        }
-        .spy-item:hover { background: var(--primary-dim); box-shadow: 0 0 20px var(--primary-glow); transform: translateX(5px); }
-        .spy-item.checkout {
-            border-left: 4px solid var(--green);
-            background: linear-gradient(90deg, rgba(0,229,160,0.15) 0%, rgba(0,229,160,0.05) 100%);
-            box-shadow: 0 0 25px rgba(0,229,160,0.4);
-            animation: checkoutPulse 0.6s ease;
-        }
-        .spy-item.sale {
-            border-left: 4px solid var(--yellow);
-            background: linear-gradient(90deg, rgba(255,201,64,0.15) 0%, rgba(255,201,64,0.05) 100%);
-            box-shadow: 0 0 25px rgba(255,201,64,0.4);
-        }
-        @keyframes slideInLeft { from { opacity:0; transform: translateX(-30px); } to { opacity:1; transform: translateX(0); } }
-        @keyframes checkoutPulse { 0%{transform:scale(0.95); box-shadow:0 0 15px rgba(0,229,160,0.2);} 50%{transform:scale(1.02); box-shadow:0 0 35px rgba(0,229,160,0.6);} 100%{transform:scale(1); box-shadow:0 0 25px rgba(0,229,160,0.4);} }
+/* ===== ANALYSIS SCREEN ===== */
+#s-analysis {
+  background: var(--cream);
+}
+.analysis-wrap {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 70px 20px 40px;
+}
+.analysis-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 4px;
+}
+.analysis-sub {
+  font-size: 14px;
+  color: var(--gray);
+  margin-bottom: 20px;
+}
+.analysis-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  border-left: 4px solid var(--orange);
+}
+.analysis-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.analysis-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-dark);
+  flex: 1;
+}
+.analysis-pct {
+  font-family: 'Baloo 2', cursive;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--orange-dark);
+  min-width: 42px;
+  text-align: right;
+}
+.bar-bg {
+  width: 100%;
+  height: 8px;
+  background: var(--gray-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--orange-dark));
+  border-radius: 4px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.analysis-you {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-dark);
+  margin-bottom: 14px;
+  text-align: center;
+}
+.analysis-options { display: flex; flex-direction: column; gap: 10px; }
+.analysis-opt {
+  background: var(--white);
+  border: 2px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-dark);
+  display: flex; align-items: center; gap: 10px;
+  transition: all 0.2s;
+}
+.analysis-opt:hover { border-color: var(--orange); transform: translateX(3px); }
 
-        .spy-avatar { width:45px; height:45px; border-radius:50%; background: linear-gradient(135deg, var(--primary-dark) 0%, #4d9fff 100%); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; color:#fff; flex-shrink:0; }
-        .spy-item.checkout .spy-avatar { background: linear-gradient(135deg, #00c880 0%, var(--green) 100%); color:#000; }
-        .spy-item.sale .spy-avatar { background: linear-gradient(135deg, #e6a800 0%, var(--yellow) 100%); color:#000; }
+/* ===== GUARANTEE SCREEN ===== */
+#s-guarantee {
+  background: var(--cream);
+}
+.guarantee-wrap {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 70px 20px 40px;
+  text-align: center;
+}
+.guarantee-icon { font-size: 64px; margin-bottom: 12px; }
+.guarantee-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.guarantee-sub {
+  font-size: 15px;
+  color: var(--gray);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.wins-card {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.07);
+  text-align: left;
+}
+.wins-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--orange);
+  margin-bottom: 14px;
+  text-align: center;
+  letter-spacing: .5px;
+}
+.win-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-dark);
+}
+.win-item:last-child { margin-bottom: 0; }
+.win-check {
+  width: 22px; height: 22px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  font-size: 12px;
+}
 
-        .spy-content { flex:1; min-width:0; }
-        .spy-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-        .spy-id { color:#fff; font-weight:800; font-size:14px; }
-        .spy-time { color:#999; font-size:11px; font-weight:600; white-space:nowrap; }
-        .spy-status { color:#ccc; font-size:13px; font-weight:600; line-height:1.4; }
-        .spy-status.checkout { color:var(--green); font-weight:800; font-size:14px; }
-        .spy-status.sale { color:var(--yellow); font-weight:800; font-size:14px; }
+/* ===== CALCULATING SCREEN ===== */
+#s-calculating {
+  background: var(--cream);
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.calc-inner {
+  max-width: 380px;
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+}
+.calc-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 8px;
+}
+.calc-sub { font-size: 15px; color: var(--gray); margin-bottom: 36px; }
+.calc-steps { text-align: left; margin-bottom: 32px; }
+.calc-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray);
+  background: var(--white);
+  transition: all 0.4s;
+}
+.calc-step.done { color: var(--green); background: #F0FDF4; }
+.calc-step.active { color: var(--orange-dark); background: #FFF7ED; }
+.calc-step-icon { font-size: 20px; }
+.calc-step-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--gray-light);
+  margin-left: auto; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: all 0.3s; flex-shrink: 0;
+}
+.calc-step.done .calc-step-check { background: var(--green); border-color: var(--green); color: white; }
+.calc-step.active .calc-step-check { border-color: var(--orange); }
+.calc-progress-outer {
+  background: var(--gray-light);
+  border-radius: 50px;
+  height: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.calc-progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--orange-dark));
+  border-radius: 50px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+.calc-pct {
+  font-family: 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--orange-dark);
+}
+.confetti-wrap {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 200;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  width: 10px; height: 10px;
+  top: -20px;
+  animation: confettiFall 2.5s ease-in forwards;
+  border-radius: 2px;
+}
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
 
-        /* Quiz progress dots */
-        .quiz-progress-dots { display:flex; gap:4px; margin-top:6px; align-items:center; }
-        .qp-dot { width:18px; height:5px; border-radius:3px; background:#1e2a44; transition:background 0.3s; }
-        .qp-dot.done { background: var(--primary); }
-        .qp-dot.current { background: var(--yellow); animation: pulseBlue 1s infinite; }
-        .qp-label { font-size:10px; color:#999; margin-left:6px; font-weight:700; }
+/* ===== LANDING PAGE ===== */
+#s-offer {
+  background: var(--cream);
+  flex-direction: column;
+}
+.lp-section { max-width: 480px; margin: 0 auto; padding: 0 20px; width: 100%; }
 
-        .spy-badges { display:flex; flex-direction:column; gap:5px; align-items:flex-end; }
-        .online-dot { display:inline-block; width:10px; height:10px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; box-shadow:0 0 10px rgba(0,229,160,0.6); }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.6;transform:scale(1.2);} }
-        .checkout-badge { display:inline-block; background:var(--green); color:#000; padding:5px 12px; border-radius:6px; font-size:10px; font-weight:900; text-transform:uppercase; box-shadow:0 0 15px rgba(0,229,160,0.4); }
-        .sale-badge { display:inline-block; background:linear-gradient(135deg,#e6a800,var(--yellow)); color:#000; padding:5px 12px; border-radius:6px; font-size:10px; font-weight:900; text-transform:uppercase; box-shadow:0 0 15px rgba(255,201,64,0.4); }
+/* Hero */
+.lp-hero {
+  background: linear-gradient(180deg, #FFF7ED 0%, var(--cream) 100%);
+  padding: 70px 0 40px;
+  text-align: center;
+}
+.lp-above-h {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--orange);
+  background: var(--orange-light);
+  border-radius: 50px;
+  padding: 5px 14px;
+  margin-bottom: 14px;
+}
+.lp-h1 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--gray-dark);
+  margin-bottom: 14px;
+}
+.lp-h1 span { color: var(--orange); }
+.lp-sub {
+  font-size: 15px;
+  color: var(--gray);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+.stars-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray);
+  margin-top: 12px;
+}
+.stars-row .stars { color: var(--yellow); font-size: 16px; }
 
-        /* ── PAÍSES COMPACTO ── */
-        .countries-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-        .country-pill { background:rgba(0,0,0,0.4); border:1px solid #1e2a44; border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; transition:border-color 0.3s; }
-        .country-pill:hover { border-color:var(--green); }
-        .country-flag { font-size:22px; flex-shrink:0; }
-        .country-data { flex:1; min-width:0; }
-        .country-name { font-size:11px; color:#999; }
-        .country-nums { display:flex; gap:8px; margin-top:3px; align-items:baseline; }
-        .country-vis { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; color:#fff; }
-        .country-conv { font-size:10px; color:var(--green); font-weight:700; }
-        .country-rev  { font-size:10px; color:var(--yellow); }
-        .country-pill.hottest { border-color:var(--primary) !important; box-shadow:0 0 12px var(--primary-glow); }
+/* LP Image placeholder */
+.lp-img-placeholder {
+  width: 100%;
+  max-width: 380px;
+  height: 240px;
+  background: linear-gradient(135deg, #FED7AA, #FDBA74, #F97316);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 12px 40px rgba(249,115,22,.3);
+  font-size: 15px;
+  font-weight: 800;
+  color: rgba(255,255,255,.8);
+  flex-direction: column;
+  gap: 8px;
+}
+.lp-img-placeholder .img-icon { font-size: 48px; }
 
-        /* ── EMPTY / LOADING ── */
-        .empty-state { text-align:center; padding:60px 20px; color:#666; font-size:14px; }
-        .loading-spinner { border:3px solid rgba(26,107,255,0.1); border-top:3px solid var(--primary); border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite; margin:0 auto 20px; }
-        @keyframes spin { to{transform:rotate(360deg);} }
+/* Personalized section */
+.lp-personalized {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,.06);
+}
+.lp-personalized-above {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+.lp-personalized-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+.lp-features { display: flex; flex-direction: column; gap: 10px; }
+.lp-feature {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 700; color: var(--gray-dark);
+}
+.feat-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
 
-        ::-webkit-scrollbar { width:8px; }
-        ::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
-        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:4px; }
-        ::-webkit-scrollbar-thumb:hover { background:#4d9fff; }
+/* Why it works */
+.lp-why {
+  padding: 32px 0;
+}
+.lp-section-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 6px;
+  text-align: center;
+  line-height: 1.2;
+}
+.lp-section-sub {
+  font-size: 13px;
+  color: var(--gray);
+  text-align: center;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+.why-grid { display: flex; flex-direction: column; gap: 14px; }
+.why-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  border-left: 4px solid var(--orange);
+}
+.why-card-icon { font-size: 28px; margin-bottom: 8px; }
+.why-card-title { font-size: 16px; font-weight: 800; color: var(--gray-dark); margin-bottom: 6px; }
+.why-card-text { font-size: 13px; color: var(--gray); line-height: 1.55; }
+.lp-quote {
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border-left: 4px solid var(--orange);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.6;
+  font-style: italic;
+}
+.lp-quote cite { display: block; margin-top: 8px; font-size: 12px; font-style: normal; font-weight: 800; color: var(--orange-dark); }
 
-        @media (max-width:1200px) {
-            .main-grid { grid-template-columns:1fr; }
-            .chart-and-retention { grid-template-columns:1fr; }
-            .comparison-grid { grid-template-columns:1fr; }
-        }
-        @media (max-width:700px) {
-            .countries-grid { grid-template-columns:repeat(2,1fr); }
-        }
-    </style>
+/* Compare table */
+.lp-compare { padding: 28px 0; }
+.compare-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  text-align: center;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.compare-sub { font-size: 13px; color: var(--gray); text-align: center; margin-bottom: 22px; }
+.compare-item { margin-bottom: 22px; }
+.compare-challenge-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 800; color: var(--gray-dark);
+  margin-bottom: 12px;
+}
+.compare-col {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.compare-col.before { border-left: 4px solid var(--red); }
+.compare-col.after { border-left: 4px solid var(--green); }
+.compare-col-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+.before .compare-col-label { color: var(--red); }
+.after .compare-col-label { color: var(--green); }
+.compare-col-text { font-size: 13px; color: var(--gray); line-height: 1.5; margin-bottom: 10px; }
+.compare-stat {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 800; color: var(--gray-dark);
+}
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.before .stat-dot { background: var(--red); }
+.after .stat-dot { background: var(--green); }
+.stat-bar-wrap { flex: 1; height: 6px; background: var(--gray-light); border-radius: 3px; overflow: hidden; }
+.stat-bar { height: 100%; border-radius: 3px; }
+.before .stat-bar { background: var(--red); }
+.after .stat-bar { background: var(--green); }
+
+/* Testimonials */
+.lp-testimonials { padding: 28px 0; }
+.testimonial-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.t-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.t-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; color: white; flex-shrink: 0;
+}
+.t-name { font-size: 15px; font-weight: 800; color: var(--gray-dark); }
+.t-stars { color: var(--yellow); font-size: 13px; }
+.t-text { font-size: 13px; color: var(--gray); line-height: 1.6; }
+
+/* Offer box */
+.lp-offer-box {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(249,115,22,.15);
+  border: 2px solid var(--orange-light);
+  position: relative;
+  overflow: hidden;
+}
+.lp-offer-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--orange), var(--orange-dark));
+}
+.offer-urgency {
+  background: #FEF2F2;
+  border: 1.5px solid #FECACA;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.offer-cta-section { text-align: center; }
+.offer-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.offer-items { text-align: left; margin-bottom: 20px; }
+.offer-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; font-weight: 700; color: var(--gray-dark);
+  margin-bottom: 10px;
+}
+.offer-item:last-child { margin-bottom: 0; }
+.offer-check { color: var(--green); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.price-block { margin-bottom: 16px; }
+.price-old { font-size: 15px; color: var(--gray); text-decoration: line-through; margin-bottom: 4px; }
+.price-new {
+  font-family: 'Baloo 2', cursive;
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--orange-dark);
+  line-height: 1;
+}
+.price-installment { font-size: 13px; color: var(--gray); margin-top: 4px; }
+.security-badges {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-top: 12px;
+  flex-wrap: wrap;
+}
+.sec-badge { font-size: 12px; font-weight: 700; color: var(--gray); display: flex; align-items: center; gap: 5px; }
+
+/* Countdown */
+.countdown-wrap {
+  background: linear-gradient(135deg, #1C1917, #292524);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 16px 0;
+  text-align: center;
+}
+.countdown-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #A8A29E;
+  margin-bottom: 10px;
+}
+.countdown-digits {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.cd-unit {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.cd-num {
+  background: var(--orange);
+  color: white;
+  font-family: 'Baloo 2', cursive;
+  font-size: 34px;
+  font-weight: 900;
+  border-radius: 8px;
+  width: 58px;
+  text-align: center;
+  line-height: 1;
+  padding: 6px 0;
+}
+.cd-label-text { font-size: 10px; font-weight: 800; color: #A8A29E; text-transform: uppercase; letter-spacing: 1px; }
+.cd-sep { font-family: 'Baloo 2', cursive; font-size: 30px; font-weight: 900; color: var(--orange); margin-bottom: 16px; }
+
+/* FAQ */
+.lp-faq { padding: 28px 0 40px; }
+.faq-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.faq-sub { font-size: 13px; color: var(--gray); text-align: center; margin-bottom: 20px; }
+.faq-item {
+  background: var(--white);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.faq-q {
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  font-size: 14px; font-weight: 800; color: var(--gray-dark);
+  user-select: none;
+}
+.faq-icon { font-size: 16px; color: var(--orange); flex-shrink: 0; transition: transform 0.3s; }
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s;
+  font-size: 13px; color: var(--gray); line-height: 1.6; padding: 0 18px;
+}
+.faq-item.open .faq-icon { transform: rotate(180deg); }
+.faq-item.open .faq-a { max-height: 200px; padding: 0 18px 16px; }
+
+/* Final CTA bottom */
+.lp-final-cta {
+  background: linear-gradient(180deg, var(--cream2), #FFF7ED);
+  padding: 32px 0;
+  text-align: center;
+}
+.lp-final-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-dark);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.lp-final-sub { font-size: 14px; color: var(--gray); margin-bottom: 20px; line-height: 1.6; }
+.warning-box {
+  background: #FEF2F2;
+  border: 1.5px solid #FECACA;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #991B1B;
+  margin-top: 16px;
+  line-height: 1.5;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+
+/* Divider */
+.lp-divider { height: 1px; background: var(--gray-light); margin: 8px 0; }
+
+/* Utility */
+.text-center { text-align: center; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-0 { margin-bottom: 0; }
+</style>
 </head>
 <body>
-<div class="container">
 
-    <!-- ALERTAS EM TEMPO REAL -->
-    <div class="alerts-container" id="alerts-container"></div>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+<div class="confetti-wrap" id="confettiWrap"></div>
 
-    <!-- HEADER -->
-    <div class="header">
-        <div class="title">🌎 PROTOCOLO HERCULES — Dashboard LATAM</div>
-        <div class="subtitle">Monitoreo en Tiempo Real · América Latina</div>
+<!-- ====== SCREEN 1: INTRO ====== -->
+<div class="screen active" id="s1">
+  <div style="max-width:420px;width:100%;margin:0 auto;padding:60px 24px 40px;text-align:center;">
+    <div class="top-badge" style="margin-bottom:20px;">
+      🧠 Guia TDAH Kids
     </div>
-
-    <!-- ONLINE AGORA -->
-    <div class="online-badge">
-        <div class="online-label">👥 Online Ahora (LATAM)</div>
-        <div class="online-count" id="online-now">0</div>
+    <div class="s1-product-img" style="margin-bottom:20px;">
+      <div class="new-badge">Novo!</div>
+      <div class="s1-product-img-text">📋<br>Guia TDAH<br>Kids</div>
     </div>
-
-    <!-- COMPARAÇÃO DE PERÍODOS -->
-    <div class="comparison-section">
-        <div class="section-title">📊 Comparación de Períodos</div>
-        <div class="comparison-selector">
-            <select class="comparison-select" id="period-a" onchange="updateComparison()">
-                <option value="today">Hoy</option>
-                <option value="yesterday">Ayer</option>
-                <option value="7days">Últimos 7 días</option>
-                <option value="30days" selected>Últimos 30 días</option>
-            </select>
-            <span style="color:#999;align-self:center;font-weight:800;">VS</span>
-            <select class="comparison-select" id="period-b" onchange="updateComparison()">
-                <option value="today">Hoy</option>
-                <option value="yesterday">Ayer</option>
-                <option value="7days">Últimos 7 días</option>
-                <option value="30days">Últimos 30 días</option>
-                <option value="prev_period" selected>Período Anterior</option>
-            </select>
-        </div>
-        <div class="comparison-grid" id="comparison-grid"></div>
+    <div class="personalized-pill">✨ 100% personalizado para o cérebro do seu filho</div>
+    <h1 class="s1-h1">Seu filho não é <span>preguiçoso.</span></h1>
+    <p class="s1-sub">O cérebro dele só precisa de um sistema diferente.</p>
+    <p class="s1-desc">Responda <strong>5 perguntas rápidas</strong> e receba um guia criado especialmente para a rotina do seu filho com TDAH — para vocês usarem juntos.</p>
+    <button class="btn-primary" onclick="goTo('s2')">Criar o Guia do Meu Filho →</button>
+    <p style="font-size:12px;color:#A8A29E;margin-top:10px;font-weight:600;">Leva menos de 2 minutos · Para crianças de 4 a 14 anos</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;">
+      <span style="display:flex;">
+        <span style="width:28px;height:28px;border-radius:50%;border:2px solid white;background:linear-gradient(135deg,#FDBA74,#F97316);display:flex;align-items:center;justify-content:center;font-size:12px;">👩</span>
+        <span style="width:28px;height:28px;border-radius:50%;border:2px solid white;background:linear-gradient(135deg,#FED7AA,#FDBA74);display:flex;align-items:center;justify-content:center;font-size:12px;margin-left:-8px;">👩</span>
+        <span style="width:28px;height:28px;border-radius:50%;border:2px solid white;background:linear-gradient(135deg,#F97316,#EA6C0A);display:flex;align-items:center;justify-content:center;font-size:12px;margin-left:-8px;">👩</span>
+      </span>
+      <span style="font-size:13px;font-weight:700;color:#57534E;">+2.400 famílias já transformaram a rotina</span>
     </div>
-
-    <!-- STATS: ACESSOS + CONVERSÕES -->
-    <div class="main-grid">
-        <div class="stats-section">
-            <div class="section-title">📊 Accesos (Visión Actual)</div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Total Accesos</div>
-                    <div class="stat-value" id="total-visits">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Inició Quiz</div>
-                    <div class="stat-value" id="passed-instruction">0</div>
-                    <div class="stat-percent" id="passed-instruction-pct">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Completó Quiz</div>
-                    <div class="stat-value" id="clicked-vsl">0</div>
-                    <div class="stat-percent" id="clicked-vsl-pct">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Vio Resultado</div>
-                    <div class="stat-value" id="started-quiz">0</div>
-                    <div class="stat-percent" id="started-quiz-pct">0%</div>
-                </div>
-            </div>
-        </div>
-        <div class="stats-section">
-            <div class="section-title">🎯 Conversiones</div>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Leads</div>
-                    <div class="stat-value" id="total-leads">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Tasa Conclusión</div>
-                    <div class="stat-value" id="completion-rate">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">En Checkout</div>
-                    <div class="stat-value" id="checkout-count">0</div>
-                    <div class="stat-percent" id="checkout-pct">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Mayor Abandono</div>
-                    <div class="stat-value" id="highest-dropout" style="font-size:18px;">--</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- VENTAS CONFIRMADAS -->
-    <div class="stats-section" style="margin-bottom:30px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <div class="section-title" style="margin-bottom:0;">💰 VENTAS CONFIRMADAS (USD)</div>
-            <div class="compact-filters">
-                <button class="compact-filter-btn active" onclick="setDateFilter('today',event)">Hoy</button>
-                <button class="compact-filter-btn" onclick="setDateFilter('yesterday',event)">Ayer</button>
-                <button class="compact-filter-btn" onclick="setDateFilter('7days',event)">7d</button>
-                <button class="compact-filter-btn" onclick="setDateFilter('30days',event)">30d</button>
-                <button class="compact-filter-btn" onclick="setDateFilter('all',event)">Todo</button>
-                <input type="date" id="date-start" class="compact-date-input"/>
-                <input type="date" id="date-end" class="compact-date-input"/>
-                <button class="compact-filter-btn" onclick="setCustomDateRange()">OK</button>
-            </div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card highlight">
-                <div class="stat-label">Ventas</div>
-                <div class="stat-value" id="sales-today">0</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Bruto</div>
-                <div class="stat-value" id="revenue-today" style="font-size:24px;">$0</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Tasas (15%)</div>
-                <div class="stat-value" id="total-fees" style="font-size:24px;color:var(--red);">-$0</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Neto</div>
-                <div class="stat-value" id="net-revenue" style="font-size:24px;">$0</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Tasa Conversión</div>
-                <div class="stat-value" id="conversion-rate">0%</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Ticket Promedio</div>
-                <div class="stat-value" id="average-ticket" style="font-size:24px;">$0</div>
-            </div>
-            <div class="stat-card highlight">
-                <div class="stat-label">Checkouts/Venta</div>
-                <div class="stat-value" id="leads-per-sale" style="font-size:32px;">--</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- GRÁFICO VENDAS + FUNIL -->
-    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:30px;">
-        <div class="stats-section">
-            <div class="section-title">📈 Ventas a lo Largo del Tiempo</div>
-            <div class="chart-wrapper" style="height:280px;">
-                <canvas id="salesTimeChart"></canvas>
-            </div>
-        </div>
-        <div class="stats-section">
-            <div class="section-title">🎯 Funil de Conversión</div>
-            <div id="funnel-container" style="padding:10px 0;"></div>
-        </div>
-    </div>
-
-    <!-- HEATMAP -->
-    <div class="stats-section" style="margin-bottom:30px;">
-        <div class="section-title">🔥 Mejores Horarios para Vender</div>
-        <div id="heatmap-container" style="overflow-x:auto;"></div>
-    </div>
-
-    <!-- CHART PICO + QUIZ RETENTION -->
-    <div class="chart-and-retention">
-        <div class="chart-container">
-            <div class="section-title">⏰ Horário de Pico (Entradas/Hora)</div>
-            <div class="chart-wrapper"><canvas id="peakHourChart"></canvas></div>
-        </div>
-        <div class="quiz-retention">
-            <div class="section-title">📈 Retención Quiz</div>
-            <div class="quiz-stats" id="quiz-stats"><div class="empty-state">Cargando...</div></div>
-        </div>
-    </div>
-
-    <!-- PAÍSES COMPACTO -->
-    <div class="stats-section" style="margin:30px 0;">
-        <div class="section-title">🌎 Accesos por País</div>
-        <div class="countries-grid" id="countries-grid"></div>
-    </div>
-
-    <!-- SPY FEED -->
-    <div>
-        <div class="spy-section-title">🔵 Espía en Vivo (Tiempo Real)</div>
-        <div class="spy-filters">
-            <button class="spy-filter-btn active" onclick="filterSpy('all',event)">Todos</button>
-            <button class="spy-filter-btn" onclick="filterSpy('online',event)">🟢 Online</button>
-            <button class="spy-filter-btn" onclick="filterSpy('checkout',event)">💳 Checkout</button>
-            <button class="spy-filter-btn" onclick="filterSpy('sale',event)">💰 Ventas</button>
-        </div>
-        <div class="spy-container" id="spy-container">
-            <div class="empty-state"><div class="loading-spinner"></div><div>Esperando leads de LATAM...</div></div>
-        </div>
-    </div>
-
+  </div>
 </div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+<!-- ====== SCREEN 2: GÊNERO ====== -->
+<div class="screen" id="s2">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 1 de 12</div>
+    <h2 class="q-title">Seu filho é menino ou menina?</h2>
+    <p class="q-sub">Selecione uma opção</p>
+    <div class="gender-grid">
+      <button class="gender-btn" id="gender-menino" onclick="selectGender('menino')">
+        <div class="gender-img-placeholder">👦</div>
+        Menino
+      </button>
+      <button class="gender-btn" id="gender-menina" onclick="selectGender('menina')">
+        <div class="gender-img-placeholder">👧</div>
+        Menina
+      </button>
+    </div>
+  </div>
+</div>
 
-const app = initializeApp({
-    apiKey: "AIzaSyDk4wUGAeG4uQW7Rmad59AmuzqKiOYB9vk",
-    authDomain: "protocolo-hercules.firebaseapp.com",
-    projectId: "protocolo-hercules",
-    storageBucket: "protocolo-hercules.firebasestorage.app",
-    messagingSenderId: "701694377617",
-    appId: "1:701694377617:web:153290a4cd66ddaae74930"
-});
-const db = getFirestore(app);
+<!-- ====== SCREEN 3: IDADE ====== -->
+<div class="screen" id="s3">
+  <div class="quiz-wrap">
+    <div class="social-badge">
+      <div>
+        <div class="social-badge-count">4.231 meninos</div>
+        <div class="social-badge-text">Já têm seu Planner TDAH Produtivo Kids</div>
+      </div>
+    </div>
+    <div class="q-step-label">Passo 2 de 12</div>
+    <h2 class="q-title">Quantos anos <span id="s3name">ele</span> tem?</h2>
+    <p class="q-sub">Selecione uma opção</p>
+    <div class="options-grid" id="opts-age">
+      <button class="option-btn" onclick="selectSingle(this,'age','4-6','s4')">
+        <span class="opt-emoji" style="font-size:32px;">🧒</span><span>4-6 anos</span><span class="opt-check"></span>
+      </button>
+      <button class="option-btn" onclick="selectSingle(this,'age','7-9','s4')">
+        <span class="opt-emoji" style="font-size:32px;">👦</span><span>7-9 anos</span><span class="opt-check"></span>
+      </button>
+      <button class="option-btn" onclick="selectSingle(this,'age','10-12','s4')">
+        <span class="opt-emoji" style="font-size:32px;">🧑</span><span>10-12 anos</span><span class="opt-check"></span>
+      </button>
+      <button class="option-btn" onclick="selectSingle(this,'age','13-14','s4')">
+        <span class="opt-emoji" style="font-size:32px;">🧑‍🎓</span><span>13-14 anos</span><span class="opt-check"></span>
+      </button>
+    </div>
+  </div>
+</div>
 
-let allSessions = [], allSales = [];
-let peakHourChart = null, salesTimeChart = null;
-let lastCheckoutIds = new Set(), lastSaleIds = new Set();
-let currentDateFilter = 'today', customDateRange = null;
-let spyFilter = 'all';
+<!-- ====== SCREEN 4: NOME ====== -->
+<div class="screen" id="s4">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 3 de 12</div>
+    <h2 class="q-title">Qual o nome do seu filho?</h2>
+    <p class="q-sub">Vamos personalizar tudo para ele</p>
+    <div class="name-input-wrap">
+      <input type="text" class="name-input" id="childNameInput" placeholder="Ex: Pedro, Maria, João..." maxlength="30" oninput="checkName()">
+    </div>
+    <button class="btn-primary" id="btnNameNext" onclick="saveName()" style="opacity:.5;pointer-events:none;">Continuar →</button>
+  </div>
+</div>
 
-// ── TAXAS (15% fixo para LATAM / Hotmart) ──────────────────
-function calcFee(amount) { return amount * 0.15; }
-function calcNet(amount) { return amount - calcFee(amount); }
+<!-- ====== SCREEN 5: O QUE ELIMINAR ====== -->
+<div class="screen" id="s5">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 4 de 12</div>
+    <h2 class="q-title" id="s5title">O que você mais quer eliminar da rotina?</h2>
+    <p class="q-sub">Selecione quantas quiser</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate')"><span class="opt-emoji">📚</span><span>Guerras diárias no dever de casa</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate')"><span class="opt-emoji">🗂️</span><span>Desorganização constante com tudo</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate')"><span class="opt-emoji">😭</span><span>Crises, choro e birra frequentes</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate')"><span class="opt-emoji">😔</span><span>Ele/ela se acha incapaz ou diferente</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate')"><span class="opt-emoji">📣</span><span>Escola reclama e cobra o tempo todo</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'eliminate','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont5" onclick="goTo('s6')">Continuar →</button>
+  </div>
+</div>
 
-// ── HELPERS ────────────────────────────────────────────────
-const isOnline = s => s.lastActivity && (Date.now() - ms(s.lastActivity)) < 120000;
-const ms = t => t?.toMillis ? t.toMillis() : (t || 0);
-const pct = (a,b) => b > 0 ? ((a/b)*100).toFixed(1)+'%' : '0%';
-const fmt$ = v => '$'+v.toFixed(2);
+<!-- ====== SCREEN 6: DESAFIOS TDAH ====== -->
+<div class="screen" id="s6">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 5 de 12</div>
+    <h2 class="q-title" id="s6title">Em quais áreas o TDAH traz mais desafios?</h2>
+    <p class="q-sub">Selecione quantas quiser</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">🔥</span><span>Controle de impulsividade</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">🎯</span><span>Manter o foco em qualquer atividade</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">📋</span><span>Organização e planejamento</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">⏰</span><span>Gestão do tempo e horários</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">🧠</span><span>Memorizar tarefas e compromissos</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges')"><span class="opt-emoji">👥</span><span>Relacionamento com outras crianças</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'challenges','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont6" onclick="goTo('s7')">Continuar →</button>
+  </div>
+</div>
 
-function timeAgo(ts) {
-    if (!ts) return 'ahora';
-    const s = Math.floor((Date.now() - ms(ts)) / 1000);
-    if (s < 60) return 'hace '+s+'s';
-    const m = Math.floor(s/60);
-    if (m < 60) return 'hace '+m+'m';
-    const h = Math.floor(m/60);
-    if (h < 24) return 'hace '+h+'h';
-    return 'hace '+Math.floor(h/24)+'d';
-}
+<!-- ====== SCREEN 7: O QUE DISTRAI ====== -->
+<div class="screen" id="s7">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 6 de 12</div>
+    <h2 class="q-title" id="s7title">O que mais distrai?</h2>
+    <p class="q-sub">Selecione quantas quiser</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'distracts')"><span class="opt-emoji">📱</span><span>Celular, tablet ou televisão</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'distracts')"><span class="opt-emoji">👫</span><span>Outras crianças ou pessoas ao redor</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'distracts')"><span class="opt-emoji">💭</span><span>Pensamentos que fogem do assunto</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'distracts')"><span class="opt-emoji">📝</span><span>Tarefas pendentes na cabeça</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'distracts')"><span class="opt-emoji">🔊</span><span>Sons e barulhos do ambiente</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'distracts','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont7" onclick="goTo('s-analysis')">Continuar →</button>
+  </div>
+</div>
 
-function getFlag(c) {
-    const f={MX:'🇲🇽',CO:'🇨🇴',AR:'🇦🇷',PE:'🇵🇪',CL:'🇨🇱',VE:'🇻🇪',EC:'🇪🇨',UY:'🇺🇾',PY:'🇵🇾',BO:'🇧🇴',GT:'🇬🇹',HN:'🇭🇳',SV:'🇸🇻',NI:'🇳🇮',CR:'🇨🇷',PA:'🇵🇦',DO:'🇩🇴',CU:'🇨🇺',BR:'🇧🇷'};
-    return f[c] || '🌎';
-}
+<!-- ====== SCREEN: ANÁLISE ====== -->
+<div class="screen" id="s-analysis">
+  <div class="analysis-wrap">
+    <div class="q-step-label">Passo 7 de 12</div>
+    <p style="font-size:14px;font-weight:800;color:#DC2626;margin-bottom:6px;">⚠️ Preocupante...</p>
+    <h2 class="analysis-title">Até agora identificamos que a situação de <span id="anal-name">seu filho</span> está assim:</h2>
+    <p class="analysis-sub" style="margin-top:6px;">Com base nas suas respostas</p>
+    <div class="analysis-card">
+      <div class="analysis-row"><span style="font-size:18px;">⏰</span><span class="analysis-label">Dificuldade em seguir rotinas</span><span class="analysis-pct">82%</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="bar1" data-val="82"></div></div>
+      <div class="analysis-row"><span style="font-size:18px;">📚</span><span class="analysis-label">Conflitos no dever de casa</span><span class="analysis-pct">78%</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="bar2" data-val="78"></div></div>
+      <div class="analysis-row"><span style="font-size:18px;">🎒</span><span class="analysis-label">Desorganização escolar</span><span class="analysis-pct">74%</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="bar3" data-val="74"></div></div>
+      <div class="analysis-row" style="margin-bottom:0;"><span style="font-size:18px;">😔</span><span class="analysis-label">Baixa autoconfiança</span><span class="analysis-pct">71%</span></div>
+      <div class="bar-bg" style="margin-bottom:0;"><div class="bar-fill" id="bar4" data-val="71"></div></div>
+    </div>
+    <p class="analysis-you">Você se identifica?</p>
+    <div class="analysis-options">
+      <button class="analysis-opt" onclick="goTo('s-guarantee')">😓 Sim, é exatamente assim</button>
+      <button class="analysis-opt" onclick="goTo('s-guarantee')">🙂 Não, está melhor do que isso</button>
+      <button class="analysis-opt" onclick="goTo('s-guarantee')">😐 Mais ou menos</button>
+    </div>
+  </div>
+</div>
 
-function getDateRange(filter, refRange=null) {
-    const now=new Date(), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    if (filter==='custom' && customDateRange) return customDateRange;
-    if (filter==='prev_period' && refRange) { const d=refRange.end-refRange.start; return {start:new Date(refRange.start-d),end:new Date(refRange.start)}; }
-    switch(filter) {
-        case 'today':     return {start:today, end:now};
-        case 'yesterday': const y=new Date(today); y.setDate(y.getDate()-1); return {start:y,end:today};
-        case '7days':     const w=new Date(today); w.setDate(w.getDate()-7); return {start:w,end:now};
-        case '30days':    const mo=new Date(today); mo.setDate(mo.getDate()-30); return {start:mo,end:now};
-        default:          return {start:new Date(0),end:now};
-    }
-}
+<!-- ====== SCREEN: GARANTIA/WINS ====== -->
+<div class="screen" id="s-guarantee">
+  <div class="guarantee-wrap">
+    <div class="q-step-label">Passo 8 de 12</div>
+    <div class="guarantee-icon">🌟</div>
+    <h2 class="guarantee-title">Entendemos a situação de <span id="guar-name">seu filho</span>...</h2>
+    <p class="guarantee-sub">E garantimos que a rotina de vocês vai ser outra depois do Planner TDAH Produtivo Kids 😊</p>
+    <div class="wins-card">
+      <div class="wins-title">✨ O que vocês vão conquistar: ✨</div>
+      <div class="win-item"><div class="win-check">✓</div><span>Organização e rotina com clareza no dia a dia</span></div>
+      <div class="win-item"><div class="win-check">✓</div><span>Redução dos conflitos e crises em casa</span></div>
+      <div class="win-item"><div class="win-check">✓</div><span>Aumento da autoconfiança e desempenho escolar</span></div>
+    </div>
+    <button class="btn-primary" onclick="goTo('s8')">Continuar →</button>
+  </div>
+</div>
 
-function getStatusText(s) {
-    if (s.events?.checkout)      return '💳 CLICÓ EN CHECKOUT';
-    if (s.events?.offer_viewed)  return '🎯 Viendo Oferta';
-    if (s.events?.result_shown)  return '🎉 Vio Resultado Personalizado';
-    if (s.events?.quiz_completed)return '✅ Completó Quiz (8/8)';
-    if (s.events?.quiz_started)  return `📝 Respondiendo Quiz (${s.quizProgress||1}/8)`;
-    return '📱 Viendo Página';
-}
+<!-- ====== SCREEN 8: ENERGIA ====== -->
+<div class="screen" id="s8">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 9 de 12</div>
+    <h2 class="q-title" id="s8title">Como <span id="s8name">ele</span> gerencia melhor a energia durante o dia?</h2>
+    <p class="q-sub">Selecione quantas quiser</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'energy')"><span class="opt-emoji">🎮</span><span>Momentos de brincadeira livre</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'energy')"><span class="opt-emoji">🥗</span><span>Alimentação equilibrada e horários certos</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'energy')"><span class="opt-emoji">⏸️</span><span>Pausas entre as atividades</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'energy')"><span class="opt-emoji">🏃</span><span>Exercício físico ou esporte</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'energy')"><span class="opt-emoji">😴</span><span>Rotina de sono consistente</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'energy','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont8" onclick="goTo('s9')">Continuar →</button>
+  </div>
+</div>
 
-// ── QUIZ PROGRESS DOTS ─────────────────────────────────────
-function quizDotsHTML(s) {
-    if (!s.events?.quiz_started) return '';
-    const done = Math.min(s.quizProgress||0, 8);
-    const completed = !!s.events?.quiz_completed;
-    let dots='';
-    for(let i=0;i<8;i++){
-        let cls='qp-dot';
-        if(i<done) cls+=' done';
-        else if(i===done && !completed) cls+=' current';
-        dots+=`<div class="${cls}"></div>`;
-    }
-    const label = completed ? '8/8 ✓' : `${done}/8`;
-    return `<div class="quiz-progress-dots">${dots}<span class="qp-label">${label}</span></div>`;
-}
+<!-- ====== SCREEN 9: O QUE NÃO PODE FALTAR ====== -->
+<div class="screen" id="s9">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 10 de 12</div>
+    <h2 class="q-title" id="s9title">O que NÃO pode faltar no planner?</h2>
+    <p class="q-sub">Selecione quantas quiser</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">✏️</span><span>Rotina escolar e dever de casa</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">🌅</span><span>Rotina da manhã e da noite</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">🏆</span><span>Sistema de missões e recompensas</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">💪</span><span>Controle de humor e emoções</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">📖</span><span>Acompanhamento de leitura e estudos</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">🥗</span><span>Saúde e alimentação</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must')"><span class="opt-emoji">🎯</span><span>Metas semanais visuais</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'must','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont9" onclick="goTo('s10')">Continuar →</button>
+  </div>
+</div>
 
-// ── SONS ───────────────────────────────────────────────────
-function playCheckoutSound() {
-    try {
-        const ac=new (window.AudioContext||window.webkitAudioContext)();
-        const now=ac.currentTime;
-        [800,1200,1600,2000].forEach(freq=>{
-            const o=ac.createOscillator(),g=ac.createGain();
-            o.connect(g); g.connect(ac.destination);
-            o.frequency.value=freq; o.type='sine';
-            g.gain.setValueAtTime(0.2,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.8);
-            o.start(now); o.stop(now+0.8);
-        });
-    } catch(e){}
-}
-function playSaleSound() {
-    try {
-        const ac=new (window.AudioContext||window.webkitAudioContext)();
-        const now=ac.currentTime;
-        [{f:523.25,t:0},{f:659.25,t:0.15},{f:783.99,t:0.3},{f:1046.5,t:0.45}].forEach(n=>{
-            const o=ac.createOscillator(),g=ac.createGain();
-            o.connect(g); g.connect(ac.destination);
-            o.frequency.value=n.f; o.type='triangle';
-            const st=now+n.t;
-            g.gain.setValueAtTime(0.3,st); g.gain.exponentialRampToValueAtTime(0.01,st+0.3);
-            o.start(st); o.stop(st+0.3);
-        });
-    } catch(e){}
-}
+<!-- ====== SCREEN 10: ESTRUTURAR ROTINA ====== -->
+<div class="screen" id="s10">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 11 de 12</div>
+    <h2 class="q-title" id="s10title">Como estruturar a rotina para reduzir conflitos?</h2>
+    <p class="q-sub">Selecione quantas opções preferir</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'structure')"><span class="opt-emoji">✅</span><span>Checklists visuais simples</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'structure')"><span class="opt-emoji">🎯</span><span>Objetivos e metas diárias</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'structure')"><span class="opt-emoji">⭐</span><span>Sistema de recompensas e estrelas</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'structure')"><span class="opt-emoji">🎨</span><span>Organização por cores e ícones</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'structure')"><span class="opt-emoji">⏸️</span><span>Pausas programadas durante o dia</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'structure','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont10" onclick="goTo('s11')">Continuar →</button>
+  </div>
+</div>
 
-// ── ALERTAS ────────────────────────────────────────────────
-function showAlert(type,title,msg) {
-    const c=document.getElementById('alerts-container');
-    const id='alert_'+Date.now();
-    const d=document.createElement('div');
-    d.id=id; d.className=`alert-item ${type}`;
-    d.innerHTML=`<span class="alert-close" onclick="closeAlert('${id}')">×</span><div class="alert-title">${title}</div><div class="alert-message">${msg}</div>`;
-    c.appendChild(d);
-    setTimeout(()=>closeAlert(id),5000);
-}
-window.closeAlert=function(id){ const a=document.getElementById(id); if(a){a.style.animation='fadeOut 0.3s ease'; setTimeout(()=>a.remove(),300);} };
+<!-- ====== SCREEN 11: EXTRAS ====== -->
+<div class="screen" id="s11">
+  <div class="quiz-wrap">
+    <div class="q-step-label">Passo 12 de 12</div>
+    <h2 class="q-title" id="s11title">O que incluir a mais no planner?</h2>
+    <p class="q-sub">Selecione quantas opções preferir</p>
+    <div class="options-grid">
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">📚</span><span>Clube de leitura infantil</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">🌍</span><span>Inglês e idiomas</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">⚽</span><span>Esportes e atividades físicas</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">🎨</span><span>Arte, música e criatividade</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">🧩</span><span>Jogos educativos e raciocínio</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras')"><span class="opt-emoji">👫</span><span>Habilidades sociais e amizades</span><span class="opt-check"></span></button>
+      <button class="option-btn" onclick="toggleMulti(this,'extras','all')"><span class="opt-emoji">✅</span><span>Todas as opções acima</span><span class="opt-check"></span></button>
+    </div>
+    <button class="btn-continue" id="btnCont11" onclick="goTo('s-calculating')">Continuar →</button>
+  </div>
+</div>
 
-// ── COMPARAÇÃO ─────────────────────────────────────────────
-window.updateComparison=function(){
-    const pA=document.getElementById('period-a').value;
-    const pB=document.getElementById('period-b').value;
-    const rA=getDateRange(pA);
-    const rB=getDateRange(pB,rA);
-    renderComparison(calcPeriodStats(rA), calcPeriodStats(rB), pA, pB);
-};
+<!-- ====== SCREEN: CALCULANDO ====== -->
+<div class="screen" id="s-calculating">
+  <div class="calc-inner" style="padding-top:80px;">
+    <div id="calcEmoji" style="font-size:56px;margin-bottom:12px;">🧠</div>
+    <h2 class="calc-title" id="calcTitle">Analisando as respostas...</h2>
+    <p class="calc-sub" id="calcSub">Criando o planner perfeito para <span id="calc-name">seu filho</span></p>
+    <div class="calc-steps" id="calcSteps">
+      <div class="calc-step active" id="cs1"><span class="calc-step-icon">🔍</span><span>Analisando perfil do TDAH</span><span class="calc-step-check">▸</span></div>
+      <div class="calc-step" id="cs2"><span class="calc-step-icon">🧩</span><span>Mapeando desafios específicos</span><span class="calc-step-check">▸</span></div>
+      <div class="calc-step" id="cs3"><span class="calc-step-icon">🎨</span><span>Personalizando conteúdo do planner</span><span class="calc-step-check">▸</span></div>
+      <div class="calc-step" id="cs4"><span class="calc-step-icon">✨</span><span>Finalizando o seu guia exclusivo</span><span class="calc-step-check">▸</span></div>
+    </div>
+    <div class="calc-progress-outer">
+      <div class="calc-progress-inner" id="calcProgress"></div>
+    </div>
+    <div class="calc-pct" id="calcPct">0%</div>
+  </div>
+</div>
 
-function calcPeriodStats(range) {
-    const ss=allSessions.filter(s=>{
-        if(!s.enteredAt) return false;
-        const d=s.enteredAt.toDate?s.enteredAt.toDate():new Date(s.enteredAt);
-        return d>=range.start && d<=range.end;
-    });
-    const sl=allSales.filter(s=>{
-        if(!s.createdAt||s.isPaid!==true) return false;
-        const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
-        return d>=range.start && d<=range.end;
-    });
-    const gross=sl.reduce((a,s)=>a+(s.amount||0),0);
-    const fees=gross*0.15;
-    const net=gross-fees;
-    return {
-        acessos:ss.length,
-        iniciouQuiz:ss.filter(s=>s.events?.quiz_started).length,
-        completouQuiz:ss.filter(s=>s.events?.quiz_completed).length,
-        viuResultado:ss.filter(s=>s.events?.result_shown).length,
-        checkout:ss.filter(s=>s.events?.checkout).length,
-        vendas:sl.length,
-        faturamentoBruto:gross, taxas:fees, faturamento:net,
-        conversao:ss.length>0?(sl.length/ss.length)*100:0,
-        ticketMedio:sl.length>0?net/sl.length:0
-    };
-}
+<!-- ====== SCREEN: OFERTA (Landing Page) ====== -->
+<div class="screen" id="s-offer">
 
-function renderComparison(sA,sB,pA,pB){
-    const names={today:'Hoy',yesterday:'Ayer','7days':'Últimos 7d','30days':'Últimos 30d',prev_period:'Período Anterior'};
-    const isWinA=sA.conversao>=sB.conversao;
-    const row=(lbl,vA,vB,fmt=false,rev=false)=>{
-        const nA=fmt?parseFloat(vA.toString().replace(/[^\d.-]/g,'')):vA;
-        const nB=typeof vB==='number'?vB:parseFloat(vB.toString().replace(/[^\d.-]/g,''));
-        let diff=(nA-nB)*(rev?-1:1), dp=nB!==0?((diff/nB)*100):0;
-        const cls=diff>0?'positive':'negative', arrow=diff>0?'↑':'↓';
-        return `<div class="comparison-row"><div><div class="comparison-label">${lbl}</div><div class="comparison-value">${vA}</div></div>${nB!==0?`<div class="comparison-diff ${cls}">${arrow} ${Math.abs(dp).toFixed(1)}%</div>`:''}</div>`;
-    };
-    const renderCard=(stats,ref,period,isWinner)=>`
-        <div class="comparison-card ${isWinner?'winner':'loser'}">
-            <div class="comparison-header">
-                <div class="comparison-period">${names[period]}</div>
-                <div class="comparison-badge ${isWinner?'up':'down'}">${isWinner?'🏆 MEJOR':'📉 MENOR'}</div>
-            </div>
-            <div class="comparison-stats">
-                ${row('Accesos',stats.acessos,ref.acessos)}
-                ${row('Inició Quiz',stats.iniciouQuiz,ref.iniciouQuiz)}
-                ${row('Completó Quiz',stats.completouQuiz,ref.completouQuiz)}
-                ${row('Vio Resultado',stats.viuResultado,ref.viuResultado)}
-                ${row('Checkout',stats.checkout,ref.checkout)}
-                ${row('Ventas',stats.vendas,ref.vendas)}
-                ${row('Bruto',fmt$(stats.faturamentoBruto),ref.faturamentoBruto,true)}
-                ${row('Tasas',fmt$(stats.taxas),ref.taxas,true)}
-                ${row('Neto',fmt$(stats.faturamento),ref.faturamento,true)}
-                ${row('Conversión',stats.conversao.toFixed(1)+'%',ref.conversao,true)}
-                ${row('Ticket Promedio',fmt$(stats.ticketMedio),ref.ticketMedio,true)}
-            </div>
-        </div>`;
-    document.getElementById('comparison-grid').innerHTML = renderCard(sA,sB,pA,isWinA)+renderCard(sB,sA,pB,!isWinA);
-}
+  <!-- HERO -->
+  <div class="lp-hero">
+    <div class="lp-section">
+      <div class="lp-above-h">Personalizado para <span id="lp-name-above">seu filho</span></div>
+      <h1 class="lp-h1">O TDAH do <span id="lp-name-h1">seu filho</span> sob controle com esse planner!</h1>
+      <p class="lp-sub">Baseado nas suas respostas, criamos o planner perfeito para transformar os desafios de <span id="lp-name-sub">seu filho</span> em conquistas que vocês celebram juntos.</p>
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta1">Quero o Planner de <span id="cta1-name">Meu Filho</span> agora!</a>
+      <div class="stars-row"><span class="stars">★★★★★</span> <strong>4,9 de 5</strong> (4.231+ famílias)</div>
+    </div>
+  </div>
 
-// ── FILTRO DE DATAS ────────────────────────────────────────
-window.setDateFilter=function(filter,evt){
-    currentDateFilter=filter; customDateRange=null;
-    document.querySelectorAll('.compact-filter-btn').forEach(b=>b.classList.remove('active'));
-    if(evt) evt.target.classList.add('active');
-    updateSalesStats(); updateSalesTimeChart(); updateFunnel();
-};
-window.setCustomDateRange=function(){
-    const s=document.getElementById('date-start').value, e=document.getElementById('date-end').value;
-    if(!s||!e){alert('Selecione ambas as datas!');return;}
-    const start=new Date(s); start.setHours(0,0,0,0);
-    const end=new Date(e); end.setHours(23,59,59,999);
-    if(start>end){alert('Data inicial maior que final!');return;}
-    customDateRange={start,end}; currentDateFilter='custom';
-    document.querySelectorAll('.compact-filter-btn').forEach(b=>b.classList.remove('active'));
-    updateSalesStats(); updateSalesTimeChart(); updateFunnel();
-};
+  <!-- IMAGE 1 -->
+  <div class="lp-section" style="padding:20px 20px 0;">
+    <div class="lp-img-placeholder">
+      <div class="img-icon">📋</div>
+      <span>[ Imagem do Planner ]</span>
+    </div>
+  </div>
 
-// ── STATS PRINCIPAIS ───────────────────────────────────────
-function updateStats() {
-    const total=allSessions.length;
-    const online=allSessions.filter(s=>isOnline(s)).length;
-    const iniciouQuiz=allSessions.filter(s=>s.events?.quiz_started).length;
-    const completouQuiz=allSessions.filter(s=>s.events?.quiz_completed).length;
-    const viuResultado=allSessions.filter(s=>s.events?.result_shown).length;
-    const clickedCheckout=allSessions.filter(s=>s.events?.checkout).length;
+  <!-- PERSONALIZED FEATURES -->
+  <div class="lp-section">
+    <div class="lp-personalized">
+      <div class="lp-personalized-above">Personalizado para o cérebro TDAH de <span id="lp-pers-name">seu filho</span></div>
+      <div class="lp-personalized-title">O que incluímos no planner de <span id="lp-pers2-name">seu filho</span></div>
+      <p style="font-size:13px;color:#57534E;margin-bottom:16px;line-height:1.6;">Com base nas suas respostas, criamos uma combinação única de recursos para atender as necessidades específicas de <span id="lp-pers3-name">seu filho</span>:</p>
+      <div class="lp-features">
+        <div class="lp-feature"><div class="feat-check">✓</div>Sistema de Missões TDAH personalizado</div>
+        <div class="lp-feature"><div class="feat-check">✓</div>Rotinas visuais de manhã, tarde e noite</div>
+        <div class="lp-feature"><div class="feat-check">✓</div>Checklists anti-esquecimento</div>
+        <div class="lp-feature"><div class="feat-check">✓</div>Guia completo para os pais</div>
+      </div>
+    </div>
+  </div>
 
-    // Detectar novos checkouts
-    allSessions.forEach(s=>{
-        if(s.events?.checkout && !lastCheckoutIds.has(s.id)){
-            lastCheckoutIds.add(s.id);
-            playCheckoutSound();
-            const sid=(s.sessionId||s.id).slice(-6).toUpperCase();
-            showAlert('checkout','💳 NUEVO CHECKOUT!',`Lead #${sid} está en el checkout ahora!`);
-        }
-    });
+  <!-- IMAGE 2 + CTA -->
+  <div class="lp-section">
+    <div class="lp-img-placeholder" style="height:180px;">
+      <div class="img-icon">🎨</div>
+      <span>[ Imagem do Conteúdo ]</span>
+    </div>
+    <div style="margin-top:16px;">
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta2">Quero o planner de <span id="cta2-name">Meu Filho</span></a>
+    </div>
+  </div>
 
-    document.getElementById('online-now').textContent=online;
-    document.getElementById('total-visits').textContent=total;
-    document.getElementById('passed-instruction').textContent=iniciouQuiz;
-    document.getElementById('clicked-vsl').textContent=completouQuiz;
-    document.getElementById('started-quiz').textContent=viuResultado;
-    document.getElementById('total-leads').textContent=completouQuiz;
-    document.getElementById('checkout-count').textContent=clickedCheckout;
-    document.getElementById('passed-instruction-pct').textContent=pct(iniciouQuiz,total);
-    document.getElementById('clicked-vsl-pct').textContent=pct(completouQuiz,total);
-    document.getElementById('started-quiz-pct').textContent=pct(viuResultado,total);
-    document.getElementById('checkout-pct').textContent=pct(clickedCheckout,total);
-    document.getElementById('completion-rate').textContent=pct(completouQuiz,iniciouQuiz);
-
-    const dropouts={'Gancho':total-iniciouQuiz,'Quiz':iniciouQuiz-completouQuiz,'Análisis':completouQuiz-viuResultado,'Checkout':viuResultado-clickedCheckout};
-    const max=Object.entries(dropouts).reduce((m,[k,v])=>v>m.val?{stage:k,val:v}:m,{stage:'--',val:0});
-    document.getElementById('highest-dropout').textContent=max.val>0?max.stage:'--';
-
-    updatePeakHourChart();
-    updateQuizRetention();
-}
-
-// ── VENTAS ─────────────────────────────────────────────────
-function updateSalesStats() {
-    const range=getDateRange(currentDateFilter);
-    const filtered=allSales.filter(s=>{
-        if(!s.createdAt||s.isPaid!==true) return false;
-        const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
-        return d>=range.start && d<=range.end;
-    });
-
-    // Novas vendas hoje
-    const today=new Date(); today.setHours(0,0,0,0);
-    allSales.filter(s=>{
-        if(!s.createdAt||s.isPaid!==true) return false;
-        const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
-        return d>=today;
-    }).forEach(s=>{
-        if(!lastSaleIds.has(s.transactionId||s.id)){
-            lastSaleIds.add(s.transactionId||s.id);
-            playSaleSound();
-            const gross=s.amount||0, net=calcNet(gross);
-            showAlert('sale','💰 ¡NUEVA VENTA!',`Bruto: ${fmt$(gross)} | Neto: ${fmt$(net)} 🎉`);
-        }
-    });
-
-    const count=filtered.length;
-    const gross=filtered.reduce((a,s)=>a+(s.amount||0),0);
-    const fees=gross*0.15, net=gross-fees;
-    const visits=allSessions.filter(s=>{
-        if(!s.enteredAt) return false;
-        const d=s.enteredAt.toDate?s.enteredAt.toDate():new Date(s.enteredAt);
-        return d>=range.start && d<=range.end;
-    }).length;
-    const checkouts=allSessions.filter(s=>{
-        if(!s.enteredAt) return false;
-        const d=s.enteredAt.toDate?s.enteredAt.toDate():new Date(s.enteredAt);
-        return s.events?.checkout && d>=range.start && d<=range.end;
-    }).length;
-
-    document.getElementById('sales-today').textContent=count;
-    document.getElementById('revenue-today').textContent=fmt$(gross);
-    document.getElementById('total-fees').textContent='-'+fmt$(fees);
-    document.getElementById('net-revenue').textContent=fmt$(net);
-    document.getElementById('conversion-rate').textContent=visits>0?((count/visits)*100).toFixed(1)+'%':'0%';
-    document.getElementById('average-ticket').textContent=fmt$(count>0?net/count:0);
-    document.getElementById('leads-per-sale').textContent=count>0?Math.round(checkouts/count):'--';
-
-    updateSalesTimeChart();
-    updateHeatmap();
-    updateCountries();
-}
-
-// ── GRÁFICO VENDAS AO LONGO DO TEMPO ──────────────────────
-function updateSalesTimeChart() {
-    const range=getDateRange(currentDateFilter);
-    const byDay={};
-    allSales.forEach(s=>{
-        if(!s.createdAt||s.isPaid!==true) return;
-        const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
-        if(d>=range.start&&d<=range.end){ const k=d.toLocaleDateString('es-ES'); byDay[k]=(byDay[k]||0)+1; }
-    });
-    const days=[], counts=[];
-    const cur=new Date(range.start), end=new Date(range.end);
-    while(cur<=end){ const k=cur.toLocaleDateString('es-ES'); days.push(k); counts.push(byDay[k]||0); cur.setDate(cur.getDate()+1); }
-
-    const ctx=document.getElementById('salesTimeChart');
-    if(!ctx) return;
-    if(salesTimeChart) salesTimeChart.destroy();
-    salesTimeChart=new Chart(ctx.getContext('2d'),{
-        type:'line',
-        data:{ labels:days, datasets:[{label:'Ventas',data:counts,borderColor:'#00e5a0',backgroundColor:'rgba(0,229,160,0.1)',borderWidth:3,fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:'#00e5a0',pointBorderColor:'#fff',pointBorderWidth:2,pointHoverRadius:7}]},
-        options:{ responsive:true, maintainAspectRatio:false,
-            plugins:{legend:{labels:{color:'#fff',font:{size:12,weight:'bold'}}}},
-            scales:{
-                x:{grid:{color:'rgba(26,107,255,0.1)'},ticks:{color:'#999',font:{size:10},maxRotation:45,minRotation:45,maxTicksLimit:15}},
-                y:{beginAtZero:true,grid:{color:'rgba(26,107,255,0.1)'},ticks:{color:'#999',font:{size:10},stepSize:1}}
-            }
-        }
-    });
-}
-
-// ── FUNIL ─────────────────────────────────────────────────
-function updateFunnel() {
-    const total=allSessions.length;
-    const iniciouQuiz=allSessions.filter(s=>s.events?.quiz_started).length;
-    const completouQuiz=allSessions.filter(s=>s.events?.quiz_completed).length;
-    const viuResultado=allSessions.filter(s=>s.events?.result_shown).length;
-    const oferta=allSessions.filter(s=>s.events?.offer_viewed).length;
-    const checkout=allSessions.filter(s=>s.events?.checkout).length;
-    const sales=allSales.filter(s=>s.isPaid===true).length;
-    const stages=[
-        {name:'Total Accesos',count:total,pct:100},
-        {name:'Inició Quiz',count:iniciouQuiz,pct:total>0?(iniciouQuiz/total)*100:0},
-        {name:'Completó Quiz',count:completouQuiz,pct:total>0?(completouQuiz/total)*100:0},
-        {name:'Vio Resultado',count:viuResultado,pct:total>0?(viuResultado/total)*100:0},
-        {name:'Visualizó Oferta',count:oferta,pct:total>0?(oferta/total)*100:0},
-        {name:'Clicó Checkout',count:checkout,pct:total>0?(checkout/total)*100:0},
-        {name:'💰 VENTAS',count:sales,pct:total>0?(sales/total)*100:0}
-    ];
-    document.getElementById('funnel-container').innerHTML=stages.map((s,i)=>`
-        <div class="funnel-stage">
-            <div class="funnel-stage-header">
-                <div class="funnel-stage-name">${s.name}</div>
-                <div class="funnel-stage-count">${s.count}</div>
-            </div>
-            <div class="funnel-stage-bar"><div class="funnel-stage-fill" style="width:${s.pct}%"></div></div>
-            <div class="funnel-stage-percent">${s.pct.toFixed(1)}% do total</div>
+  <!-- WHY IT WORKS -->
+  <div class="lp-section">
+    <div class="lp-why">
+      <div class="lp-section-title">Por que o Planner TDAH Produtivo Kids funciona?</div>
+      <div class="lp-section-sub">Baseado em neurociência e estratégias comprovadas para o cérebro TDAH infantil</div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-card-icon">🧠</div>
+          <div class="why-card-title">Estímulo Dopaminérgico</div>
+          <div class="why-card-text">Cada página foi projetada para liberar dopamina através de cores, ilustrações e pequenas conquistas — mantendo o cérebro TDAH de <span class="dyn-name">seu filho</span> engajado e motivado.</div>
         </div>
-        ${i<stages.length-1?'<div class="funnel-arrow">↓</div>':''}
-    `).join('');
+        <div class="why-card">
+          <div class="why-card-icon">🎨</div>
+          <div class="why-card-title">Linguagem Visual Adaptada</div>
+          <div class="why-card-text">Ao contrário de agendas tradicionais, o TDAH Produtivo Kids usa ícones, cores e espaços visuais que o cérebro infantil com TDAH processa com muito mais facilidade.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-card-icon">🚀</div>
+          <div class="why-card-title">Sistema de Missões</div>
+          <div class="why-card-text">Transformamos rotinas chatas em missões com começo, meio e fim claros — porque a criança com TDAH precisa de estrutura, mas também de movimento e novidade.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-card-icon">⭐</div>
+          <div class="why-card-title">Micro-Conquistas Visíveis</div>
+          <div class="why-card-text">Cada página cria pequenas vitórias frequentes que <span class="dyn-name">seu filho</span> pode ver e marcar. Isso substitui o ciclo de frustração pelo ciclo de confiança.</div>
+        </div>
+      </div>
+      <div class="lp-quote">
+        O Planner TDAH Produtivo Kids foi desenvolvido com base em pesquisas sobre como o cérebro TDAH infantil funciona — transformando a rotina de um campo de batalha em um ambiente de conquistas diárias.
+        <cite>— Equipe TDAH Produtivo Kids</cite>
+      </div>
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta3">Quero o planner de <span id="cta3-name">Meu Filho</span></a>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div class="lp-section">
+    <div class="lp-compare">
+      <div class="compare-title">Transforme os desafios em conquistas</div>
+      <div class="compare-sub">Como o planner resolve os desafios de <span id="lp-comp-name">seu filho</span></div>
+
+      <div class="compare-item">
+        <div class="compare-challenge-label"><span>⏰</span> Guerra diária no dever de casa</div>
+        <div class="compare-col before">
+          <div class="compare-col-label">ANTES</div>
+          <div class="compare-col-text"><span class="dyn-name">Seu filho</span> resiste, chora ou ignora completamente a hora do dever. Você se sente esgotada e culpada.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Dever concluído no prazo</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:18%"></span></span><strong>18%</strong></div>
+        </div>
+        <div class="compare-col after">
+          <div class="compare-col-label">DEPOIS</div>
+          <div class="compare-col-text">Sistema de micro-tarefas com tempo visual que transforma o dever em missões de 10 minutos — sem conflito.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Dever concluído no prazo</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:84%"></span></span><strong>84%</strong></div>
+        </div>
+      </div>
+
+      <div class="compare-item">
+        <div class="compare-challenge-label"><span>😤</span> Esquecimento e desorganização constante</div>
+        <div class="compare-col before">
+          <div class="compare-col-label">ANTES</div>
+          <div class="compare-col-text">Material esquecido, mochila bagunçada, horários perdidos. Você lembra por ele — e se sente exausta.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Itens esquecidos/semana</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:90%"></span></span><strong>9x</strong></div>
+        </div>
+        <div class="compare-col after">
+          <div class="compare-col-label">DEPOIS</div>
+          <div class="compare-col-text">Checklists visuais de manhã e noite que <span class="dyn-name">seu filho</span> usa com autonomia crescente.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Itens esquecidos/semana</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:10%"></span></span><strong>1x</strong></div>
+        </div>
+      </div>
+
+      <div class="compare-item">
+        <div class="compare-challenge-label"><span>😔</span> "Eu sou burro. Não consigo."</div>
+        <div class="compare-col before">
+          <div class="compare-col-label">ANTES</div>
+          <div class="compare-col-text"><span class="dyn-name">Seu filho</span> se compara com outras crianças e sente que algo está errado com ele.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Autoconfiança percebida</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:20%"></span></span><strong>Baixa</strong></div>
+        </div>
+        <div class="compare-col after">
+          <div class="compare-col-label">DEPOIS</div>
+          <div class="compare-col-text">Sistema de missões e recompensas que mostra para ele, visualmente, o quanto está evoluindo.</div>
+          <div class="compare-stat"><span class="stat-dot"></span><span style="white-space:nowrap">Autoconfiança percebida</span><span class="stat-bar-wrap"><span class="stat-bar" style="width:90%"></span></span><strong>Alta</strong></div>
+        </div>
+      </div>
+
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta4">Quero transformar a rotina de <span id="cta4-name">Meu Filho</span>!</a>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="lp-section">
+    <div class="lp-testimonials">
+      <div class="lp-section-title">O que dizem os pais que já usam</div>
+      <div class="lp-section-sub">Veja como o Planner TDAH Produtivo Kids transformou a rotina de famílias como a sua:</div>
+      <div class="testimonial-card">
+        <div class="t-header"><div class="t-avatar">AM</div><div><div class="t-name">Ana Martins</div><div class="t-stars">★★★★★</div></div></div>
+        <div class="t-text">"Meu filho de 8 anos tem TDAH e a hora do dever de casa era um pesadelo todo dia. Depois do planner, ele mesmo vai buscar a folha de missões. Chorei de alívio na primeira semana."</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-header"><div class="t-avatar">CS</div><div><div class="t-name">Camila Souza</div><div class="t-stars">★★★★★</div></div></div>
+        <div class="t-text">"O que me convenceu foi o Guia dos Pais. Finalmente entendi como aplicar a rotina sem virar policial. Minha filha de 10 anos usa há 3 semanas e a professora já perguntou o que mudou."</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-header"><div class="t-avatar">RP</div><div><div class="t-name">Ricardo Pereira</div><div class="t-stars">★★★★★</div></div></div>
+        <div class="t-text">"Tentei agenda normal, aplicativo, timer — nada funcionava. Esse planner é diferente porque foi feito para o cérebro dela, não contra ele. Minha filha de 7 anos chama de 'caderno das missões'."</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="t-header"><div class="t-avatar">LF</div><div><div class="t-name">Letícia Faria</div><div class="t-stars">★★★★★</div></div></div>
+        <div class="t-text">"Meu filho adolescente de 13 anos resistiu no começo. Hoje ele mesmo preenche o planner antes de dormir. A autoconfiança mudou visivelmente em 30 dias."</div>
+      </div>
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta5">Quero o planner de <span id="cta5-name">Meu Filho</span>!</a>
+    </div>
+  </div>
+
+  <!-- OFFER BOX -->
+  <div class="lp-section">
+    <div class="lp-final-cta">
+      <div class="lp-final-title">Transforme o TDAH de <span id="lp-fin-name">seu filho</span> na maior força dele</div>
+      <div class="lp-final-sub">Não deixe que o TDAH controle a rotina da sua família. Com o Planner TDAH Produtivo Kids, você terá todas as ferramentas para transformar os desafios de <span id="lp-fin2-name">seu filho</span> em conquistas diárias.</div>
+      <p style="font-size:14px;font-weight:700;color:#57534E;margin-bottom:6px;">Você acabou de criar o planner de <span id="lp-fin3-name">seu filho</span> — e ele está reservado por:</p>
+      <p style="font-size:12px;color:#A8A29E;margin-bottom:16px;font-weight:600;">O desconto foi ativado ao criar o planner e é válido apenas nessa sessão</p>
+      
+      <!-- COUNTDOWN -->
+      <div class="countdown-wrap">
+        <div class="countdown-label">⏰ Seu planner expira em</div>
+        <div class="countdown-digits">
+          <div class="cd-unit"><div class="cd-num" id="cd-min">10</div><div class="cd-label-text">min</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-sec">00</div><div class="cd-label-text">seg</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT YOU GET -->
+    <div class="lp-offer-box" id="anchor-offer">
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:18px;">
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:800;color:#F97316;margin-bottom:10px;">O que você recebe hoje:</div>
+          <div class="offer-items">
+            <div class="offer-item"><span class="offer-check">✓</span><span>Planner personalizado com mais de 150 páginas exclusivas para <span class="dyn-name">seu filho</span></span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Sistema de Missões e Recompensas adaptado ao cérebro TDAH infantil</span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Rotinas visuais de manhã, tarde e noite</span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Guia completo para os pais — como usar, como manter, como adaptar</span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Acesso Vitalício e Atualizações Gratuitas</span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Garantia de 30 dias — satisfação ou seu dinheiro de volta</span></div>
+            <div class="offer-item"><span class="offer-check">✓</span><span>Acesso imediato no e-mail + suporte direto pelo WhatsApp em caso de dúvidas</span></div>
+          </div>
+        </div>
+        <div style="flex-shrink:0;">
+          <div style="width:100px;height:130px;background:linear-gradient(135deg,#FED7AA,#F97316);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 24px rgba(249,115,22,.3);">📋</div>
+        </div>
+      </div>
+      <div class="price-block text-center">
+        <div class="price-old">Preço normal R$ 98</div>
+        <div style="font-size:13px;font-weight:700;color:#57534E;">Com seu desconto, apenas:</div>
+        <div class="price-new">R$ 29,90</div>
+        <div class="price-installment">ou 4x de R$ 8,02 no cartão</div>
+      </div>
+      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" style="margin-top:16px;font-size:20px;padding:20px;" id="cta-main">
+        Comprar Agora →
+      </a>
+      <div class="security-badges mt-12">
+        <div class="sec-badge">🔒 Compra Segura</div>
+        <div class="sec-badge">✅ Satisfação Garantida</div>
+        <div class="sec-badge">📥 Acesso Imediato</div>
+      </div>
+      <div class="warning-box mt-16">
+        <span>⚠️</span>
+        <span>Se fechar essa página, o planner que criamos para <span class="dyn-name">seu filho</span> com base nas suas respostas será deletado. Você precisará refazer o quiz e o desconto de R$68 não estará garantido.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="lp-section">
+    <div class="lp-faq">
+      <div class="faq-title">Perguntas frequentes</div>
+      <div class="faq-sub">Dúvidas comuns</div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Como recebo o planner após a compra? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">Assim que o pagamento for confirmado, você receberá um e-mail com o link para acesso imediato ao planner em PDF, pronto para imprimir ou usar no tablet.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Meu filho não tem diagnóstico formal. Funciona? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">Sim! O planner funciona para qualquer criança que apresente comportamentos típicos do TDAH, com ou sem diagnóstico. As estratégias visuais e de gamificação beneficiam todos os perfis.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Para qual idade o planner é indicado? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">O planner foi desenvolvido para crianças de 4 a 14 anos. Dependendo da faixa etária, algumas seções são mais indicadas — por isso personalizamos com base nas suas respostas.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Preciso usar junto com ele ou ele pode usar sozinho? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">No início (1-2 semanas) recomendamos o uso junto com a criança para criar o hábito. Depois, a maioria das crianças passa a usar com autonomia crescente.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Como funciona a garantia de 30 dias? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">Se em até 30 dias você não estiver satisfeita, basta enviar uma mensagem e devolvemos 100% do valor pago. Sem perguntas, sem burocracia.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Como posso imprimir o planner? <span class="faq-icon">▼</span></div>
+        <div class="faq-a">O planner vem em PDF otimizado para impressão A4 colorida. Recomendamos impressão em gráfica local para melhor qualidade, mas pode ser impresso em qualquer impressora doméstica.</div>
+      </div>
+      <div style="margin-top:20px;">
+        <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" id="cta-faq">Quero o planner de <span id="cta-faq-name">Meu Filho</span> agora!</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end s-offer -->
+
+<script>
+// ===== STATE =====
+let childName = '';
+let childGender = 'menino';
+const CHECKOUT_URL = 'https://pay.wiapy.com/6-rDR4Sz4N';
+
+// ===== NAVIGATION =====
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const next = document.getElementById(screenId);
+  if (next) {
+    next.classList.add('active');
+    window.scrollTo(0,0);
+    updateProgress(screenId);
+    onEnterScreen(screenId);
+  }
 }
 
-// ── HEATMAP ───────────────────────────────────────────────
-function updateHeatmap() {
-    const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    const hours=['00h','04h','08h','12h','16h','20h'];
-    const data={};
-    days.forEach(d=>{data[d]={}; hours.forEach(h=>{data[d][h]=0;});});
-    allSales.forEach(s=>{
-        if(!s.createdAt||s.isPaid!==true) return;
-        const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
-        const day=days[d.getDay()], h=d.getHours();
-        const slot=h<4?'00h':h<8?'04h':h<12?'08h':h<16?'12h':h<20?'16h':'20h';
-        data[day][slot]++;
+const screenOrder = ['s1','s2','s3','s4','s5','s6','s7','s-analysis','s-guarantee','s8','s9','s10','s11','s-calculating','s-offer'];
+function updateProgress(id) {
+  const idx = screenOrder.indexOf(id);
+  const pct = idx < 0 ? 100 : Math.round((idx / (screenOrder.length - 1)) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function onEnterScreen(id) {
+  const n = childName || 'seu filho';
+  const pronoun = childGender === 'menina' ? 'ela' : 'ele';
+
+  // Update name placeholders
+  const nameFields = {
+    's3name': pronoun,
+    'anal-name': n,
+    'guar-name': n,
+    's8name': pronoun,
+    'calc-name': n,
+    'lp-name-above': n,
+    'lp-name-h1': n,
+    'lp-name-sub': n,
+    'lp-pers-name': n,
+    'lp-pers2-name': n,
+    'lp-pers3-name': n,
+    'lp-comp-name': n,
+    'lp-fin-name': n,
+    'lp-fin2-name': n,
+    'lp-fin3-name': n,
+  };
+  Object.entries(nameFields).forEach(([el, val]) => {
+    const e = document.getElementById(el);
+    if (e) e.textContent = val;
+  });
+
+  // Update titles with name
+  const titleMap = {
+    's5title': `O que você mais quer eliminar da rotina de ${n}?`,
+    's6title': `Em quais áreas o TDAH traz mais desafios para ${n}?`,
+    's7title': `O que mais distrai ${n}?`,
+    's8title': `Como ${n} gerencia melhor a energia durante o dia?`,
+    's9title': `O que NÃO pode faltar no planner de ${n}?`,
+    's10title': `Como você deseja estruturar a rotina de ${n} para reduzir os conflitos?`,
+    's11title': `E o que gostaria de incluir a mais no planner de ${n}?`,
+  };
+  Object.entries(titleMap).forEach(([el, val]) => {
+    const e = document.getElementById(el);
+    if (e) e.textContent = val;
+  });
+
+  // CTA names
+  ['cta1-name','cta2-name','cta3-name','cta4-name','cta5-name','cta-faq-name'].forEach(id => {
+    const e = document.getElementById(id);
+    if (e) e.textContent = childName || 'Meu Filho';
+  });
+
+  // dyn-name spans
+  document.querySelectorAll('.dyn-name').forEach(el => el.textContent = n);
+
+  if (id === 's-analysis') animateBars();
+  if (id === 's-calculating') runCalculating();
+  if (id === 's-offer') startCountdown();
+  if (id === 's2') updateSocialBadge();
+}
+
+function updateSocialBadge() {
+  // nothing extra needed
+}
+
+// ===== GENDER =====
+function selectGender(g) {
+  childGender = g;
+  document.getElementById('gender-menino').classList.toggle('selected', g === 'menino');
+  document.getElementById('gender-menina').classList.toggle('selected', g === 'menina');
+  setTimeout(() => goTo('s3'), 350);
+}
+
+// ===== SINGLE SELECT =====
+function selectSingle(btn, key, val, nextScreen) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.option-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.querySelector('.opt-check').textContent = '';
+  });
+  btn.classList.add('selected');
+  btn.querySelector('.opt-check').textContent = '✓';
+  setTimeout(() => goTo(nextScreen), 300);
+}
+
+// ===== MULTI SELECT =====
+function toggleMulti(btn, key, isAll) {
+  const parent = btn.parentElement;
+  const allBtn = parent.querySelector('[onclick*="all"]');
+
+  if (isAll === 'all') {
+    const nowSelected = btn.classList.contains('selected');
+    parent.querySelectorAll('.option-btn').forEach(b => {
+      if (!nowSelected) { b.classList.add('selected'); b.querySelector('.opt-check').textContent = '✓'; }
+      else { b.classList.remove('selected'); b.querySelector('.opt-check').textContent = ''; }
     });
-    let max=0;
-    Object.values(data).forEach(d=>Object.values(d).forEach(v=>{if(v>max)max=v;}));
-    let html='<table class="heatmap-table"><thead><tr><th>Día</th>';
-    hours.forEach(h=>html+=`<th>${h}</th>`);
-    html+='</tr></thead><tbody>';
-    days.forEach(day=>{
-        html+=`<tr><td class="day-label">${day}</td>`;
-        hours.forEach(h=>{
-            const c=data[day][h];
-            let cls='empty';
-            if(max>0&&c>0){ const p=(c/max)*100; cls=p>=70?'high':p>=30?'medium':'low'; }
-            html+=`<td class="heatmap-cell ${cls}" title="${day} ${h}: ${c} ventas">${c}</td>`;
-        });
-        html+='</tr>';
+  } else {
+    btn.classList.toggle('selected');
+    btn.querySelector('.opt-check').textContent = btn.classList.contains('selected') ? '✓' : '';
+    if (allBtn && allBtn !== btn) { allBtn.classList.remove('selected'); allBtn.querySelector('.opt-check').textContent = ''; }
+  }
+
+  // Show continue btn
+  const selected = parent.querySelectorAll('.option-btn.selected').length;
+  const screenId = btn.closest('.screen').id;
+  const contMap = { s5:'btnCont5', s6:'btnCont6', s7:'btnCont7', s8:'btnCont8', s9:'btnCont9', s10:'btnCont10', s11:'btnCont11' };
+  const contBtn = document.getElementById(contMap[screenId]);
+  if (contBtn) contBtn.classList.toggle('show', selected > 0);
+}
+
+// ===== NAME =====
+function checkName() {
+  const val = document.getElementById('childNameInput').value.trim();
+  const btn = document.getElementById('btnNameNext');
+  if (val.length > 0) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+function saveName() {
+  childName = document.getElementById('childNameInput').value.trim();
+  goTo('s5');
+}
+
+// ===== ANALYSIS BARS =====
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.val + '%';
     });
-    html+='</tbody></table><div class="heatmap-legend"><div class="heatmap-legend-item"><div class="heatmap-legend-color" style="background:rgba(0,229,160,0.6)"></div><span>🟢 Alto (70%+)</span></div><div class="heatmap-legend-item"><div class="heatmap-legend-color" style="background:rgba(255,201,64,0.6)"></div><span>🟡 Medio (30-70%)</span></div><div class="heatmap-legend-item"><div class="heatmap-legend-color" style="background:rgba(255,64,96,0.6)"></div><span>🔴 Bajo (&lt;30%)</span></div></div>';
-    document.getElementById('heatmap-container').innerHTML=html;
+  }, 300);
 }
 
-// ── CHART PICO ────────────────────────────────────────────
-function updatePeakHourChart() {
-    const byHour={};
-    allSessions.forEach(s=>{
-        if(!s.enteredAt) return;
-        const d=s.enteredAt.toDate?s.enteredAt.toDate():new Date(s.enteredAt);
-        const h=d.getHours();
-        if(!byHour[h]) byHour[h]=new Set();
-        byHour[h].add(s.sessionId||s.id);
-    });
-    const labels=[], data=[];
-    for(let i=0;i<24;i++){ labels.push(i.toString().padStart(2,'0')+'h'); data.push(byHour[i]?byHour[i].size:0); }
-    const ctx=document.getElementById('peakHourChart').getContext('2d');
-    if(peakHourChart) peakHourChart.destroy();
-    peakHourChart=new Chart(ctx,{
-        type:'line',
-        data:{labels,datasets:[{label:'Visitantes',data,borderColor:'#1a6bff',backgroundColor:'rgba(26,107,255,0.1)',borderWidth:3,fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#1a6bff',pointBorderColor:'#fff',pointBorderWidth:2,pointHoverRadius:6,pointHoverBackgroundColor:'#00e5a0'}]},
-        options:{responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{labels:{color:'#fff',font:{size:12,weight:'bold'}}}},
-            scales:{
-                x:{grid:{color:'rgba(26,107,255,0.1)'},ticks:{color:'#999',font:{size:10},maxRotation:45,minRotation:45}},
-                y:{beginAtZero:true,grid:{color:'rgba(26,107,255,0.1)'},ticks:{color:'#999',font:{size:10},stepSize:1}}
-            }
-        }
-    });
+// ===== CALCULATING =====
+function runCalculating() {
+  const steps = ['cs1','cs2','cs3','cs4'];
+  const pcts = [25,50,75,100];
+  let idx = 0;
+  const prog = document.getElementById('calcProgress');
+  const pctEl = document.getElementById('calcPct');
+
+  function step() {
+    if (idx > 0) {
+      document.getElementById(steps[idx-1]).classList.remove('active');
+      document.getElementById(steps[idx-1]).classList.add('done');
+      document.getElementById(steps[idx-1]).querySelector('.calc-step-check').textContent = '✓';
+    }
+    if (idx < steps.length) {
+      document.getElementById(steps[idx]).classList.add('active');
+      prog.style.width = pcts[idx] + '%';
+      pctEl.textContent = pcts[idx] + '%';
+      idx++;
+      setTimeout(step, 900);
+    } else {
+      prog.style.width = '100%';
+      pctEl.textContent = '100%';
+      setTimeout(() => {
+        launchConfetti();
+        setTimeout(() => goTo('s-offer'), 1800);
+      }, 400);
+    }
+  }
+  step();
 }
 
-// ── QUIZ RETENTION ────────────────────────────────────────
-function updateQuizRetention() {
-    const qNames=['Tamaño','Duración','Satisfacción','Edad','Alimentación','Sueño','Ya Probó','Prioridad'];
-    const qProgress={};
-    for(let i=1;i<=8;i++) qProgress[i]=0;
-    allSessions.forEach(s=>{ const p=s.quizProgress||0; for(let i=1;i<=p;i++) qProgress[i]++; });
-    const total=allSessions.filter(s=>s.events?.quiz_started).length;
-    if(!total){ document.getElementById('quiz-stats').innerHTML='<div class="empty-state">Esperando datos del quiz...</div>'; return; }
-    document.getElementById('quiz-stats').innerHTML=Array.from({length:8},(_,i)=>{
-        const n=qProgress[i+1], p=total>0?Math.round((n/total)*100):0;
-        return `<div class="quiz-row"><div class="quiz-step">Q${i+1}: ${qNames[i]}</div><div class="quiz-count">${n} (${p}%)</div></div>`;
-    }).join('');
+// ===== CONFETTI =====
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.innerHTML = '';
+  const colors = ['#F97316','#FACC15','#22C55E','#3B82F6','#EC4899','#FED7AA'];
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = Math.random() * 1 + 's';
+    p.style.animationDuration = (1.5 + Math.random()) + 's';
+    p.style.width = p.style.height = (8 + Math.random() * 8) + 'px';
+    p.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    wrap.appendChild(p);
+  }
+  setTimeout(() => wrap.innerHTML = '', 4000);
 }
 
-// ── PAÍSES ────────────────────────────────────────────────
-function updateCountries() {
-    const codes=['MX','CO','AR','PE','CL','OTHER'];
-    const names={MX:'México',CO:'Colombia',AR:'Argentina',PE:'Perú',CL:'Chile',OTHER:'Otros'};
-    const data={}; codes.forEach(c=>data[c]={visits:0,sales:0,revenue:0});
-    allSessions.forEach(s=>{ const c=data[s.country]?s.country:'OTHER'; data[c].visits++; });
-    allSales.forEach(s=>{ const c=data[s.country]?s.country:'OTHER'; data[c].sales++; data[c].revenue+=s.amount||0; });
-    const maxV=Math.max(...codes.map(c=>data[c].visits),1);
-    document.getElementById('countries-grid').innerHTML=codes.map(code=>{
-        const d=data[code];
-        const conv=d.visits>0?((d.sales/d.visits)*100).toFixed(1)+'%':'0%';
-        const isHot=d.visits===maxV&&d.visits>0;
-        return `<div class="country-pill${isHot?' hottest':''}">
-            <div class="country-flag">${code==='OTHER'?'🌎':getFlag(code)}</div>
-            <div class="country-data">
-                <div class="country-name">${names[code]}</div>
-                <div class="country-nums"><span class="country-vis">${d.visits}</span><span class="country-conv">${conv}</span><span class="country-rev">${fmt$(d.revenue)}</span></div>
-            </div>
-        </div>`;
-    }).join('');
+// ===== COUNTDOWN =====
+function startCountdown() {
+  let total = 10 * 60;
+  function tick() {
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    document.getElementById('cd-min').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-sec').textContent = String(s).padStart(2,'0');
+    if (total > 0) { total--; setTimeout(tick, 1000); }
+  }
+  tick();
 }
 
-// ── SPY FEED ──────────────────────────────────────────────
-window.filterSpy=function(filter,evt){
-    spyFilter=filter;
-    document.querySelectorAll('.spy-filter-btn').forEach(b=>b.classList.remove('active'));
-    if(evt) evt.target.classList.add('active');
-    updateSpyFeed();
-};
-
-function updateSpyFeed() {
-    const container=document.getElementById('spy-container');
-    const sorted=[...allSessions].sort((a,b)=>ms(b.lastActivity)-ms(a.lastActivity));
-    const unique=[], seen=new Set();
-    for(const s of sorted){ const id=s.sessionId||s.id; if(!seen.has(id)){seen.add(id);unique.push(s);} }
-
-    let filtered=unique;
-    if(spyFilter==='online') filtered=unique.filter(s=>isOnline(s));
-    else if(spyFilter==='checkout') filtered=unique.filter(s=>s.events?.checkout);
-    else if(spyFilter==='sale') filtered=unique.filter(s=>{ const id=s.sessionId||s.id; return allSales.some(x=>x.isPaid===true&&(x.sessionId===id||x.externalId===id)); });
-
-    const list=filtered.slice(0,50);
-    if(!list.length){ container.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:15px;">🔍</div><div style="color:#999;">Ningún lead encontrado</div></div>'; return; }
-
-    container.innerHTML=list.map(s=>{
-        const online=isOnline(s);
-        const sid=s.sessionId||s.id;
-        const shortId=sid.slice(-6).toUpperCase();
-        const isCheckout=s.events?.checkout;
-        const sale=allSales.find(x=>x.isPaid===true&&(x.sessionId===sid||x.externalId===sid));
-        const hasSale=!!sale;
-        const netAmt=hasSale?calcNet(sale.amount||0):0;
-        const statusText=hasSale?'💰 ¡COMPRÓ!':getStatusText(s);
-        let itemCls='spy-item', statusCls='spy-status';
-        if(hasSale){itemCls+=' sale'; statusCls+=' sale';}
-        else if(isCheckout){itemCls+=' checkout'; statusCls+=' checkout';}
-        return `
-        <div class="${itemCls}">
-            <div class="spy-avatar">${shortId.charAt(0)}</div>
-            <div class="spy-content">
-                <div class="spy-header">
-                    <div class="spy-id">Lead #${shortId} ${getFlag(s.country)}</div>
-                    <div class="spy-time">${timeAgo(s.enteredAt)}</div>
-                </div>
-                <div class="${statusCls}">${statusText}</div>
-                ${quizDotsHTML(s)}
-            </div>
-            <div class="spy-badges">
-                ${online&&!hasSale?'<div class="online-dot"></div>':''}
-                ${isCheckout&&!hasSale?'<div class="checkout-badge">CHECKOUT</div>':''}
-                ${hasSale?`<div class="sale-badge">${fmt$(netAmt)}</div>`:''}
-            </div>
-        </div>`;
-    }).join('');
+// ===== FAQ =====
+function toggleFaq(el) {
+  const item = el.parentElement;
+  item.classList.toggle('open');
 }
 
-// ── FIREBASE LISTENERS ────────────────────────────────────
-onSnapshot(query(collection(db,'sessions'),orderBy('enteredAt','desc')),snap=>{
-    allSessions=snap.docs.map(d=>({id:d.id,...d.data()}))
-        .filter(s=>s.source==='tiktok_latam'||s.source==='latam');
-    updateStats(); updateFunnel(); updateSpyFeed(); updateComparison();
+// ===== CTA ANCHORS =====
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href="' + CHECKOUT_URL + '"]');
+  if (a) return; // let it through
 });
-onSnapshot(query(collection(db,'sales'),orderBy('createdAt','desc')),snap=>{
-    allSales=snap.docs.map(d=>({id:d.id,...d.data()}))
-        .filter(s=>(s.source==='latam'||s.source==='tiktok_latam')&&s.isPaid===true);
-    updateSalesStats(); updateFunnel(); updateSpyFeed();
-});
-
-// Auto-refresh a cada 30s
-setInterval(()=>{ updateStats(); updateSpyFeed(); updateSalesStats(); },30000);
 
 // Init
-updatePeakHourChart(); updateFunnel(); updateHeatmap(); updateComparison();
+updateProgress('s1');
 </script>
 </body>
 </html>
