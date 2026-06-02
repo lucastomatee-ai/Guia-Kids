@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guia TDAH Kids – Quiz Personalizado</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
+
+<!-- Facebook Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1819107922060720');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1819107922060720&ev=PageView&noscript=1"/></noscript>
+
+<!-- Utmify -->
+<script
+  src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+  data-utmify-prevent-xcod-sck
+  data-utmify-prevent-subids
+  async
+  defer
+></script>
 <style>
 :root {
   --orange: #F97316;
@@ -112,14 +133,17 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
 .analysis-opt:hover { border-color:var(--orange); transform:translateX(3px); }
 .preocupante-label { font-size:22px; font-weight:900; color:var(--red); text-align:center; margin-bottom:10px; background:#FEF2F2; border-radius:12px; padding:12px; letter-spacing:.5px; }
 
-/* GUARANTEE */
+/* GUARANTEE WINS */
 .guarantee-box { background:linear-gradient(135deg,var(--green),#15803D); border-radius:16px; padding:18px; margin-bottom:18px; text-align:center; }
 .guarantee-box-text { font-size:15px; font-weight:800; color:white; line-height:1.4; }
-.wins-card { background:white; border-radius:18px; padding:20px; margin-bottom:22px; box-shadow:0 4px 20px rgba(0,0,0,.07); border:2px solid var(--green-light); }
-.wins-title { font-size:14px; font-weight:800; color:var(--green); margin-bottom:14px; text-align:center; letter-spacing:.5px; }
-.win-item { display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; font-size:15px; font-weight:700; color:var(--gray-dark); }
-.win-item:last-child { margin-bottom:0; }
-.win-check { width:22px; height:22px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:white; font-size:12px; }
+.wins-card { background:white; border-radius:18px; padding:20px; margin-bottom:22px; box-shadow:0 6px 24px rgba(0,0,0,.09); border:2px solid var(--green-light); }
+.wins-title { font-size:13px; font-weight:900; color:var(--green); margin-bottom:16px; text-align:center; letter-spacing:.5px; text-transform:uppercase; }
+.win-item { display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; }
+.win-icon-wrap { width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#DCFCE7,#BBF7D0); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.win-content { flex:1; }
+.win-label { font-size:14px; font-weight:900; color:var(--gray-dark); margin-bottom:2px; line-height:1.2; }
+.win-text { font-size:12px; color:var(--gray); line-height:1.4; }
+.win-divider { height:1px; background:var(--green-light); margin:0 0 14px; }
 
 /* CALCULATING */
 #s-calculating { background:var(--cream); align-items:center; justify-content:center; }
@@ -159,13 +183,53 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
 /* MODULE CARDS */
 .module-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; }
 .module-card { background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,.07); border:1.5px solid var(--gray-light); display:flex; flex-direction:column; }
-.module-card-body { padding:14px 14px 10px; display:flex; flex-direction:column; gap:6px; }
-.module-title { font-family:'Baloo 2',cursive; font-size:13px; font-weight:900; color:var(--gray-dark); line-height:1.2; text-transform:uppercase; letter-spacing:.3px; }
-.module-desc { font-size:11.5px; color:var(--gray); line-height:1.5; }
-.module-img { width:100%; object-fit:cover; height:130px; display:block; }
-.module-tag { font-size:10px; font-weight:800; color:var(--orange); background:var(--orange-light); border-radius:50px; padding:3px 8px; display:inline-block; margin:0 14px 12px; width:fit-content; }
+.module-card-body { padding:12px 12px 8px; display:flex; flex-direction:column; gap:4px; }
+.module-title { font-family:'Baloo 2',cursive; font-size:12px; font-weight:900; color:var(--gray-dark); line-height:1.2; text-transform:uppercase; letter-spacing:.2px; }
+.module-desc { font-size:11px; color:var(--gray); line-height:1.4; }
+.module-img { width:100%; height:auto; display:block; }
+.module-tag { font-size:10px; font-weight:800; color:var(--orange); background:var(--orange-light); border-radius:50px; padding:3px 8px; display:inline-block; margin:6px 12px 12px; width:fit-content; }
 
 .mod-extra-img { width:100%; border-radius:16px; display:block; box-shadow:0 8px 24px rgba(0,0,0,.1); margin-bottom:8px; }
+
+/* RESPONSIVE: mobile single column for modules */
+@media (max-width: 480px) {
+  .module-grid { grid-template-columns:1fr; }
+  .module-title { font-size:15px; }
+  .module-desc { font-size:13px; }
+  .module-card-body { padding:14px 14px 10px; }
+
+  /* offer box: stacked on mobile */
+  .offer-side-layout { flex-direction:column !important; align-items:center !important; }
+  .offer-side-layout .offer-img-col { width:100% !important; text-align:center; }
+  .offer-side-layout .offer-img-col img { width:200px !important; max-width:100%; margin:0 auto 4px; display:block; }
+
+  /* btn text wrapping fix */
+  .btn-primary, .btn-continue { font-size:16px !important; padding:16px 18px !important; line-height:1.2; text-align:center; word-break:break-word; }
+  .btn-primary span, .btn-continue span { display:inline; }
+
+  /* lp hero */
+  .lp-hero { padding:60px 0 28px; }
+  .lp-h1 { font-size:26px; }
+
+  /* countdown digits */
+  .cd-num { font-size:28px; width:50px; }
+
+  /* testi 2col: single on very small */
+  .testi-2col { grid-template-columns:1fr; }
+
+  /* compare 2col stays 2col but smaller padding */
+  .compare-2col { gap:8px; }
+  .compare-col { padding:10px; }
+  .compare-col-text { font-size:11px; }
+
+  /* why 2col stays */
+  .why-card { padding:12px; }
+  .why-card-text { font-size:11px; }
+
+  /* quiz wrap smaller padding */
+  .quiz-wrap { padding:64px 16px 32px; }
+  .q-title { font-size:20px; }
+}
 
 /* WHY GRID */
 .why-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
@@ -291,7 +355,7 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
 
     <!-- Product image with real photo + badge 2.0 -->
     <div style="position:relative;width:220px;margin:0 auto 20px;">
-      <img src="https://i.ibb.co/DHB6vN7T/grok-image-49dd818f-b635-4fab-ad2e-e77f9029b9b5-1.jpg" alt="Guia TDAH Kids" style="width:220px;height:170px;object-fit:cover;border-radius:18px;box-shadow:0 12px 40px rgba(249,115,22,.3);display:block;" />
+      <img src="https://i.ibb.co/DHB6vN7T/grok-image-49dd818f-b635-4fab-ad2e-e77f9029b9b5-1.jpg" alt="Guia TDAH Kids" style="width:220px;height:auto;border-radius:18px;box-shadow:0 12px 40px rgba(249,115,22,.3);display:block;" />
       <div style="position:absolute;top:10px;left:10px;background:var(--orange);color:white;font-size:10px;font-weight:800;border-radius:4px;padding:2px 8px;">Novo!</div>
     </div>
 
@@ -517,11 +581,40 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
     <div class="guarantee-box">
       <div class="guarantee-box-text">E garantimos que a rotina de vocês vai ser outra depois do Planner TDAH Produtivo Kids 😊</div>
     </div>
+
     <div class="wins-card">
       <div class="wins-title">✨ O que vocês vão conquistar: ✨</div>
-      <div class="win-item"><div class="win-check">✓</div><span>Organização e rotina com clareza no dia a dia</span></div>
-      <div class="win-item"><div class="win-check">✓</div><span>Redução dos conflitos e crises em casa</span></div>
-      <div class="win-item"><div class="win-check">✓</div><span>Aumento da autoconfiança e desempenho escolar</span></div>
+      <div class="win-item">
+        <div class="win-icon-wrap">📅</div>
+        <div class="win-content">
+          <div class="win-label">Organização e rotina</div>
+          <div class="win-text">Clareza no dia a dia sem conflitos e sem precisar lembrar por ele</div>
+        </div>
+      </div>
+      <div class="win-divider"></div>
+      <div class="win-item">
+        <div class="win-icon-wrap">🕊️</div>
+        <div class="win-content">
+          <div class="win-label">Menos conflitos em casa</div>
+          <div class="win-text">Fim das brigas diárias no dever de casa e nas rotinas</div>
+        </div>
+      </div>
+      <div class="win-divider"></div>
+      <div class="win-item">
+        <div class="win-icon-wrap">🏆</div>
+        <div class="win-content">
+          <div class="win-label">Autoconfiança e desempenho</div>
+          <div class="win-text">Criança que acredita em si mesma e performa melhor na escola</div>
+        </div>
+      </div>
+      <div class="win-divider"></div>
+      <div class="win-item" style="margin-bottom:0;">
+        <div class="win-icon-wrap">💛</div>
+        <div class="win-content">
+          <div class="win-label">Paz interior</div>
+          <div class="win-text">Aproveitamento saudável do tempo em família — sem exaustão</div>
+        </div>
+      </div>
     </div>
     <button class="btn-primary" onclick="goTo('s8')">Continuar →</button>
   </div>
@@ -879,15 +972,15 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
     <div class="lp-offer-box" id="anchor-offer">
       <div class="offer-title">⬇️ O que você recebe hoje:</div>
 
-      <!-- Image + items side by side -->
-      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
-        <div style="flex-shrink:0;">
-          <img src="https://i.ibb.co/vxGMDTMC/grok-image-75fba4ab-1a5d-4068-9f15-285bcc385532.jpg" alt="Planner TDAH Kids" style="width:100px;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(249,115,22,.25);" />
+      <!-- Image top, items below (stacks naturally on mobile) -->
+      <div class="offer-side-layout" style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
+        <div class="offer-img-col" style="flex-shrink:0;">
+          <img src="https://i.ibb.co/vxGMDTMC/grok-image-75fba4ab-1a5d-4068-9f15-285bcc385532.jpg" alt="Planner TDAH Kids" style="width:110px;border-radius:12px;display:block;box-shadow:0 6px 20px rgba(249,115,22,.25);" />
         </div>
         <div class="offer-items-list" style="flex:1;margin-bottom:0;">
           <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">+150 páginas exclusivas para <span class="dyn-name">seu filho</span></span></div>
           <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Sistema de Missões e Recompensas TDAH</span></div>
-          <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Rotinas visuais de manhã, tarde e noite</span></div>
+          <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Rotinas visuais manhã, tarde e noite</span></div>
           <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Guia completo para os pais</span></div>
           <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Acesso Vitalício + Atualizações Gratuitas</span></div>
           <div class="offer-item"><span class="offer-check">✓</span><span class="offer-item-text">Garantia de 30 dias</span></div>
@@ -902,7 +995,7 @@ body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--gra
         <div class="price-installment">ou 4x de R$ 8,02 no cartão</div>
       </div>
 
-      <a href="https://pay.wiapy.com/6-rDR4Sz4N" class="btn-primary" style="font-size:20px;padding:20px;">
+      <a href="#" onclick="goToCheckout(event)" class="btn-primary" style="font-size:20px;padding:20px;">
         Comprar Agora →
       </a>
       <div class="security-badges mt-16">
@@ -992,7 +1085,10 @@ function onEnterScreen(id) {
     document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.val + '%');
   }, 300);
   if (id === 's-calculating') runCalculating();
-  if (id === 's-offer') startCountdown();
+  if (id === 's-offer') {
+    startCountdown();
+    if (typeof fbq !== 'undefined') fbq('track', 'Lead');
+  }
 }
 
 // ===== GENDER =====
@@ -1104,7 +1200,21 @@ function startCountdown() {
   tick();
 }
 
-// ===== CTA SCROLL (all anchors) =====
+// ===== CHECKOUT: forward all UTM/URL params =====
+const CHECKOUT_BASE = 'https://pay.wiapy.com/6-rDR4Sz4N';
+
+function getCheckoutUrl() {
+  const params = window.location.search; // e.g. "?utm_source=fb&utm_campaign=..."
+  return params ? CHECKOUT_BASE + params : CHECKOUT_BASE;
+}
+
+function goToCheckout(e) {
+  if (e) e.preventDefault();
+  if (typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout');
+  window.location.href = getCheckoutUrl();
+}
+
+// ===== CTA SCROLL (anchors within page) =====
 function scrollToOffer(e) {
   e.preventDefault();
   const el = document.getElementById('anchor-offer');
